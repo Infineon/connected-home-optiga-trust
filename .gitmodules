@@ -1,0 +1,4 @@
+[submodule "mbedtls-optiga-trust/repo"]
+	path = mbedtls-optiga-trust/repo
+	url = https://github.com/Infineon/optiga-trust-m
+	branch = development
