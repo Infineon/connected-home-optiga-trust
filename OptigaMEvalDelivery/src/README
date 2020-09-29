@@ -1,0 +1,13 @@
+This directory contains the source and .am file changes that are needed to enable the CHIP crypto tests to use the OptigaM rather than the SW MbedTLS engine
+
+In order to use the OPTIGA M there are two main functional changes:
+
+- The MbedTLS function supported by OPTIGA M may be differnt from the one chosen by the CHIP implementation. There may be some additional data manipulation/reformatting required. In particular:
+
+  The ECDA sign function required to change the mbedTLS call from mbedtls_ecdsa_write_signature() to mbedtls_ecdsa_sign(). Conversion out signature R,S value to DER was done by hand - there may be library functions to do this with better error handling - the mbedTLS versions looked very clunky.
+
+  Similarly the verify function was changed from mbedtls_ecdsa_read_signature() to mbedtls_ecdsa_verify() so raw R,S was extacted from DER format by hand.
+
+- The OPTIGA M private keys remain on the HW and are not givem to the host. This requires a different private key flow to the CHIP implementation. In particular we cannot import private key test vectors, so the tests must create the keypair on the Optiga and then export the public key from the Optiga to the test harness.
+
+The comments in the source files will provide more implementation details.
