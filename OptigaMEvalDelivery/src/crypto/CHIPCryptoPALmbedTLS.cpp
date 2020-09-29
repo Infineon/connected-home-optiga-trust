@@ -394,8 +394,10 @@ CHIP_ERROR DRBG_get_bytes(uint8_t * out_buffer, const size_t out_length)
     }
       
     IFX_DBG("IFX_>mbedtls_hardware_poll() inlength=>%d outlength=>%d\n", out_length, hw_out_length);
-    //Normally comment this out as it produces a lot of data
-    for(unsigned int i=0; i<(unsigned int) hw_out_length; i++) printf(" %0x", out_buffer[i]);
+    //Normally comment the following line out as it produces a lot of data
+    for(unsigned int i=0; i<(unsigned int) hw_out_length; i++) {
+      IFX_DBG(" %0x", out_buffer[i]);
+    }
     IFX_DBG("\n");
     //VerifyOrExit(drbg_ctxt != nullptr, error = CHIP_ERROR_INTERNAL);
 
@@ -496,7 +498,9 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
     SuccessOrExit(out_signature.SetLength(s_len+r_len+6));
      
 	  IFX_DBG("IFX_>sig length=>%0x ...\n", out_signature[1]+2);
-    for(unsigned int i=0; i<(unsigned int) (out_signature[1]+2); i++) printf(" %0x", out_signature[i]);
+    for(unsigned int i=0; i<(unsigned int) (out_signature[1]+2); i++){
+      IFX_DBG(" %0x", out_signature[i]);
+    }
     IFX_DBG("\n");
 
 
@@ -599,9 +603,9 @@ CHIP_ERROR P256Keypair::ECDH_derive_secret(const P256PublicKey & remote_public_k
         mbedtls_ecp_point_read_binary(&ecp_grp, &ecp_pubkey, Uint8::to_const_uchar(remote_public_key), remote_public_key.Length());
     VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
-    printf("IFX_>mbedtls_ecdh_compute_shared() call...\n");
+    IFX_DBG("IFX_>mbedtls_ecdh_compute_shared() call...\n");
     result = mbedtls_ecdh_compute_shared(&ecp_grp, &mpi_secret, &ecp_pubkey,  &keypair->d, CryptoRNG, NULL);
-    printf("IFX_>mbedtls_ecdh_compute_shared() returned=>%0x ...\n", result);
+    IFX_DBG("IFX_>mbedtls_ecdh_compute_shared() returned=>%0x ...\n", result);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
     result = mbedtls_mpi_write_binary(&mpi_secret, Uint8::to_uchar(out_secret), secret_length);

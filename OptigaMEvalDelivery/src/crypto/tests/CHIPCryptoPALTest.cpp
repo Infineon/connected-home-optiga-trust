@@ -683,7 +683,9 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
     }
 		//OPTIGA M prepends public key with 3 DER format bytes
     IFX_DBG("IFX_>optiga_crypt_ecc_generate_keypair buffer length=>%d ...\n", public_key_buffer_length);
-    for(uint16_t i=0; i < public_key_buffer_length; i++) printf(" %0x", hex_public_key_buffer[i]);
+    for(uint16_t i=0; i < public_key_buffer_length; i++) {
+      IFX_DBG(" %0x", hex_public_key_buffer[i]);
+    }
     IFX_DBG("\n");
     IFX_DBG("IFX_>Expected Public Key length => %d \n", (*keypairIn).mPublicKey.Length());
     NL_TEST_ASSERT(inSuite, public_key_buffer_length == ((*keypairIn).mPublicKey.Length() +3) );
