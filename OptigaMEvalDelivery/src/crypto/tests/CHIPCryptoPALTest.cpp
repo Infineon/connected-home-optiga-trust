@@ -177,7 +177,7 @@ static void TestAES_CCM_256EncryptNilKey(nlTestSuite * inSuite, void * inContext
             uint8_t out_ct[vector->ct_len];
             uint8_t out_tag[vector->tag_len];
 
-            CHIP_ERROR err = AES_CCM_encrypt(vector->pt, vector->pt_len, vector->aad, vector->aad_len, NULL, 32, vector->iv,
+            CHIP_ERROR err = AES_CCM_encrypt(vector->pt, vector->pt_len, vector->aad, vector->aad_len, nullptr, 32, vector->iv,
                                              vector->iv_len, out_ct, out_tag, vector->tag_len);
             NL_TEST_ASSERT(inSuite, err == CHIP_ERROR_INVALID_ARGUMENT);
             break;
@@ -262,7 +262,7 @@ static void TestAES_CCM_256DecryptInvalidKey(nlTestSuite * inSuite, void * inCon
             numOfTestsRan++;
             uint8_t out_pt[vector->pt_len];
             CHIP_ERROR err = AES_CCM_decrypt(vector->ct, vector->ct_len, vector->aad, vector->aad_len, vector->tag, vector->tag_len,
-                                             NULL, 32, vector->iv, vector->iv_len, out_pt);
+                                             nullptr, 32, vector->iv, vector->iv_len, out_pt);
             NL_TEST_ASSERT(inSuite, err == CHIP_ERROR_INVALID_ARGUMENT);
             break;
         }
@@ -413,7 +413,7 @@ static void TestAES_CCM_128EncryptNilKey(nlTestSuite * inSuite, void * inContext
             uint8_t out_ct[vector->ct_len];
             uint8_t out_tag[vector->tag_len];
 
-            CHIP_ERROR err = AES_CCM_encrypt(vector->pt, vector->pt_len, vector->aad, vector->aad_len, NULL, 0, vector->iv,
+            CHIP_ERROR err = AES_CCM_encrypt(vector->pt, vector->pt_len, vector->aad, vector->aad_len, nullptr, 0, vector->iv,
                                              vector->iv_len, out_ct, out_tag, vector->tag_len);
             NL_TEST_ASSERT(inSuite, err == CHIP_ERROR_INVALID_ARGUMENT);
             break;
@@ -498,7 +498,7 @@ static void TestAES_CCM_128DecryptInvalidKey(nlTestSuite * inSuite, void * inCon
             numOfTestsRan++;
             uint8_t out_pt[vector->pt_len];
             CHIP_ERROR err = AES_CCM_decrypt(vector->ct, vector->ct_len, vector->aad, vector->aad_len, vector->tag, vector->tag_len,
-                                             NULL, 0, vector->iv, vector->iv_len, out_pt);
+                                             nullptr, 0, vector->iv, vector->iv_len, out_pt);
             NL_TEST_ASSERT(inSuite, err == CHIP_ERROR_INVALID_ARGUMENT);
             break;
         }
@@ -550,9 +550,9 @@ static void TestHash_SHA256_Stream(nlTestSuite * inSuite, void * inContext)
 
     for (numOfTestsExecuted = 0; numOfTestsExecuted < numOfTestCases; numOfTestsExecuted++)
     {
-        hash_sha256_vector v       = hash_sha256_test_vectors[numOfTestsExecuted];
+        hash_sha256_vector v = hash_sha256_test_vectors[numOfTestsExecuted];
         const uint8_t * data = v.data;
-        size_t data_length         = v.data_length;
+        size_t data_length   = v.data_length;
         uint8_t out_buffer[kSHA256_Hash_Length];
 
         Hash_SHA256_stream sha256;
@@ -563,7 +563,7 @@ static void TestHash_SHA256_Stream(nlTestSuite * inSuite, void * inContext)
         // Split data into 3 random streams.
         for (int i = 0; i < 2; ++i)
         {
-            size_t rand_data_length = rand() % (data_length + 1);
+            size_t rand_data_length = static_cast<unsigned int>(rand()) % (data_length + 1);
 
             error = sha256.AddData(data, rand_data_length);
             NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
@@ -605,7 +605,7 @@ static void TestHKDF_SHA256(nlTestSuite * inSuite, void * inContext)
 static void TestDRBG_InvalidInputs(nlTestSuite * inSuite, void * inContext)
 {
     CHIP_ERROR error = CHIP_NO_ERROR;
-    error            = DRBG_get_bytes(NULL, 10);
+    error            = DRBG_get_bytes(nullptr, 10);
     NL_TEST_ASSERT(inSuite, error == CHIP_ERROR_INVALID_ARGUMENT);
     error = CHIP_NO_ERROR;
     uint8_t buffer[5];
@@ -616,9 +616,9 @@ static void TestDRBG_InvalidInputs(nlTestSuite * inSuite, void * inContext)
 static void TestDRBG_Output(nlTestSuite * inSuite, void * inContext)
 {
     // No good way to unit test a DRBG. Just validate that we get out something
-    CHIP_ERROR error           = CHIP_ERROR_INVALID_ARGUMENT;
-    uint8_t out_buf[10]  = { 0 };
-    uint8_t orig_buf[10] = { 0 };
+    CHIP_ERROR error     = CHIP_ERROR_INVALID_ARGUMENT;
+    uint8_t out_buf[512]  = { 0 };
+    uint8_t orig_buf[512] = { 0 };
 
     error = DRBG_get_bytes(out_buf, sizeof(out_buf));
     NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
@@ -643,7 +643,13 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
 
     unsigned char hex_public_key_buffer[68];
     uint16_t public_key_buffer_length = sizeof(hex_public_key_buffer);
+    unsigned char hex_private_key_buffer[32] = {0};
+    uint16_t private_key_buffer_length = sizeof(hex_private_key_buffer);
+    
+    mbedtls_ecp_keypair * mbed_keypair = reinterpret_cast<mbedtls_ecp_keypair *> (&(keypairIn->mKeypair));
  
+    //Set Private key to OID
+    ((uint16_t * ) hex_private_key_buffer)[0] = privkey_oid;
 
     IFX_DBG("IFX_>optiga_crypt_ecc_generate_keypair()...\n");
     me = NULL;
@@ -682,10 +688,14 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
     IFX_DBG("IFX_>Expected Public Key length => %d \n", (*keypairIn).mPublicKey.Length());
     NL_TEST_ASSERT(inSuite, public_key_buffer_length == ((*keypairIn).mPublicKey.Length() +3) );
     
+    //Copy public key to Public Key member
     memcpy(Uint8::to_uchar((*keypairIn).mPublicKey), &hex_public_key_buffer[3], (*keypairIn).mPublicKey.Length()); 
-    memcpy(Uint8::to_uchar((*keypairIn).mPrivateKey), &privkey_oid, 2); 
+    //public & private to keypair member
+        /*result =*/ mbedtls_ecp_point_read_binary(&mbed_keypair->grp, &mbed_keypair->Q, &hex_public_key_buffer[3], (*keypairIn).mPublicKey.Length());
+        /* result =*/  mbedtls_mpi_read_binary(&mbed_keypair->d, hex_private_key_buffer, private_key_buffer_length);
+    //memcpy(Uint8::to_uchar((*keypairIn).mPrivateKey), &privkey_oid, 2); 
     //Zero fill unused locations so that the user can see whether it's explicit private key data or an OPTIGA M OID
-    memset(Uint8::to_uchar(&(*keypairIn).mPrivateKey[2]), 0 , (*keypairIn).mPrivateKey.Length()-2);  
+    //memset(Uint8::to_uchar(&(*keypairIn).mPrivateKey[2]), 0 , (*keypairIn).mPrivateKey.Length()-2);  
     cleanup();
 }
 
@@ -694,6 +704,7 @@ static void TestECDSA_Signing_SHA256(nlTestSuite * inSuite, void * inContext)
 {
     const char * msg  = "Hello World!";
     size_t msg_length = strlen((const char *) msg);
+
     P256Keypair keypair;
     NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
 
@@ -714,15 +725,15 @@ static void TestECDSA_ValidationFailsDifferentMessage(nlTestSuite * inSuite, voi
 
     P256Keypair keypair;
     NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
-    
+
     GenKeyPairOnOptiga(inSuite, OPTIGA_KEY_ID_E0F1, &keypair);
  
     P256ECDSASignature signature;
     CHIP_ERROR signing_error = keypair.ECDSA_sign_msg((const uint8_t *) msg, msg_length, signature);
     NL_TEST_ASSERT(inSuite, signing_error == CHIP_NO_ERROR);
 
-    const char * diff_msg       = "NOT Hello World!";
-    size_t diff_msg_length      = strlen((const char *) msg);
+    const char * diff_msg  = "NOT Hello World!";
+    size_t diff_msg_length = strlen((const char *) msg);
     CHIP_ERROR validation_error =
         keypair.Pubkey().ECDSA_validate_msg_signature((const uint8_t *) diff_msg, diff_msg_length, signature);
     NL_TEST_ASSERT(inSuite, validation_error != CHIP_NO_ERROR);
@@ -741,7 +752,7 @@ static void TestECDSA_ValidationFailIncorrectSignature(nlTestSuite * inSuite, vo
     P256ECDSASignature signature;
     CHIP_ERROR signing_error = keypair.ECDSA_sign_msg((const uint8_t *) msg, msg_length, signature);
     NL_TEST_ASSERT(inSuite, signing_error == CHIP_NO_ERROR);
-    signature[0] = ~signature[0]; // Flipping bits should invalidate the signature.
+    signature[0] = static_cast<uint8_t>(~signature[0]); // Flipping bits should invalidate the signature.
 
     CHIP_ERROR validation_error = keypair.Pubkey().ECDSA_validate_msg_signature((const uint8_t *) msg, msg_length, signature);
     NL_TEST_ASSERT(inSuite, validation_error == CHIP_ERROR_INVALID_SIGNATURE);
@@ -750,15 +761,15 @@ static void TestECDSA_ValidationFailIncorrectSignature(nlTestSuite * inSuite, vo
 static void TestECDSA_SigningInvalidParams(nlTestSuite * inSuite, void * inContext)
 {
     const uint8_t * msg = (uint8_t *) "Hello World!";
-    size_t msg_length               = strlen((const char *) msg);
-    
+    size_t msg_length   = strlen((const char *) msg);
+
     P256Keypair keypair;
     NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
- 
+
     GenKeyPairOnOptiga(inSuite, OPTIGA_KEY_ID_E0F1, &keypair);
 
     P256ECDSASignature signature;
-    CHIP_ERROR signing_error = keypair.ECDSA_sign_msg(NULL, msg_length, signature);
+    CHIP_ERROR signing_error = keypair.ECDSA_sign_msg(nullptr, msg_length, signature);
     NL_TEST_ASSERT(inSuite, signing_error == CHIP_ERROR_INVALID_ARGUMENT);
     signing_error = CHIP_NO_ERROR;
 
@@ -774,14 +785,14 @@ static void TestECDSA_ValidationInvalidParam(nlTestSuite * inSuite, void * inCon
 
     P256Keypair keypair;
     NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
- 
+
     GenKeyPairOnOptiga(inSuite, OPTIGA_KEY_ID_E0F1, &keypair);
 
     P256ECDSASignature signature;
     CHIP_ERROR signing_error = keypair.ECDSA_sign_msg((const uint8_t *) msg, msg_length, signature);
     NL_TEST_ASSERT(inSuite, signing_error == CHIP_NO_ERROR);
 
-    CHIP_ERROR validation_error = keypair.Pubkey().ECDSA_validate_msg_signature(NULL, msg_length, signature);
+    CHIP_ERROR validation_error = keypair.Pubkey().ECDSA_validate_msg_signature(nullptr, msg_length, signature);
     NL_TEST_ASSERT(inSuite, validation_error == CHIP_ERROR_INVALID_ARGUMENT);
     validation_error = CHIP_NO_ERROR;
 
@@ -795,7 +806,7 @@ static void TestECDH_EstablishSecret(nlTestSuite * inSuite, void * inContext)
     P256Keypair keypair1;
     NL_TEST_ASSERT(inSuite, keypair1.Initialize() == CHIP_NO_ERROR);
     GenKeyPairOnOptiga(inSuite, 0xe100, &keypair1);
-    
+
     P256Keypair keypair2;
     NL_TEST_ASSERT(inSuite, keypair2.Initialize() == CHIP_NO_ERROR);
     GenKeyPairOnOptiga(inSuite, 0xe101, &keypair2);
@@ -803,7 +814,7 @@ static void TestECDH_EstablishSecret(nlTestSuite * inSuite, void * inContext)
 
     P256ECDHDerivedSecret out_secret1;
     out_secret1[0] = 0;
-   
+
     P256ECDHDerivedSecret out_secret2;
     out_secret2[0] = 1;
 
@@ -811,7 +822,7 @@ static void TestECDH_EstablishSecret(nlTestSuite * inSuite, void * inContext)
     NL_TEST_ASSERT(inSuite,
                    memcmp(Uint8::to_uchar(out_secret1), Uint8::to_uchar(out_secret2), out_secret1.Capacity()) !=
                        0); // Validate that buffers are indeed different.
- 
+
     error = keypair2.ECDH_derive_secret(keypair1.Pubkey(), out_secret1);
     NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
 
@@ -828,7 +839,7 @@ static void TestECDH_EstablishSecret(nlTestSuite * inSuite, void * inContext)
 #if CHIP_CRYPTO_OPENSSL
 static void TestAddEntropySources(nlTestSuite * inSuite, void * inContext)
 {
-    CHIP_ERROR error = add_entropy_source(test_entropy_source, NULL, 10);
+    CHIP_ERROR error = add_entropy_source(test_entropy_source, nullptr, 10);
     NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
     uint8_t buffer[5];
     NL_TEST_ASSERT(inSuite, DRBG_get_bytes(buffer, sizeof(buffer)) == CHIP_NO_ERROR);
@@ -838,7 +849,7 @@ static void TestAddEntropySources(nlTestSuite * inSuite, void * inContext)
 #if CHIP_CRYPTO_MBEDTLS
 static void TestAddEntropySources(nlTestSuite * inSuite, void * inContext)
 {
-    CHIP_ERROR error = add_entropy_source(test_entropy_source, NULL, 10);
+    CHIP_ERROR error = add_entropy_source(test_entropy_source, nullptr, 10);
     NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
     uint8_t buffer[5];
     uint32_t test_entropy_source_call_count = gs_test_entropy_source_called;
@@ -880,7 +891,7 @@ static void TestP256_Keygen(nlTestSuite * inSuite, void * inContext)
 {
     P256Keypair keypair;
     NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
-    
+
     GenKeyPairOnOptiga(inSuite, OPTIGA_KEY_ID_E0F1, &keypair);
 
     const char * msg         = "Test Message for Keygen";
@@ -894,14 +905,40 @@ static void TestP256_Keygen(nlTestSuite * inSuite, void * inContext)
 
 static void TestCSR_Gen(nlTestSuite * inSuite, void * inContext)
 {
-    //TBD - Needs Fix
-    uint8_t csr[32 /*kMAX_CSR_Length*/];
+    uint8_t csr[kMAX_CSR_Length];
     size_t length = sizeof(csr);
 
-    printf(">>> Testing CSR, Length => %d \n", length);
     P256Keypair keypair;
     NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
+    
+    GenKeyPairOnOptiga(inSuite, OPTIGA_KEY_ID_E0F1, &keypair);
+
     NL_TEST_ASSERT(inSuite, keypair.NewCertificateSigningRequest(csr, length) == CHIP_NO_ERROR);
+}
+
+static void TestKeypair_Serialize(nlTestSuite * inSuite, void * inContext)
+{
+    P256Keypair keypair;
+    NL_TEST_ASSERT(inSuite, keypair.Initialize() == CHIP_NO_ERROR);
+    
+    GenKeyPairOnOptiga(inSuite, OPTIGA_KEY_ID_E0F3, &keypair);
+
+    P256SerializedKeypair serialized;
+    NL_TEST_ASSERT(inSuite, keypair.Serialize(serialized) == CHIP_NO_ERROR);
+
+    P256Keypair keypair_dup;
+    NL_TEST_ASSERT(inSuite, keypair_dup.Deserialize(serialized) == CHIP_NO_ERROR);
+
+    const char * msg         = "Test Message for Keygen";
+    const uint8_t * test_msg = Uint8::from_const_char(msg);
+    size_t msglen            = strlen(msg);
+
+    P256ECDSASignature test_sig;
+    NL_TEST_ASSERT(inSuite, keypair.ECDSA_sign_msg(test_msg, msglen, test_sig) == CHIP_NO_ERROR);
+    NL_TEST_ASSERT(inSuite, keypair_dup.Pubkey().ECDSA_validate_msg_signature(test_msg, msglen, test_sig) == CHIP_NO_ERROR);
+
+    NL_TEST_ASSERT(inSuite, keypair_dup.ECDSA_sign_msg(test_msg, msglen, test_sig) == CHIP_NO_ERROR);
+    NL_TEST_ASSERT(inSuite, keypair.Pubkey().ECDSA_validate_msg_signature(test_msg, msglen, test_sig) == CHIP_NO_ERROR);
 }
 
 static void TestSPAKE2P_spake2p_FEMul(nlTestSuite * inSuite, void * inContext)
@@ -915,7 +952,7 @@ static void TestSPAKE2P_spake2p_FEMul(nlTestSuite * inSuite, void * inContext)
         const struct spake2p_fe_mul_tv * vector = fe_mul_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.FELoad(vector->fe1, vector->fe1_len, spake2p.w0);
@@ -948,7 +985,7 @@ static void TestSPAKE2P_spake2p_FELoadWrite(nlTestSuite * inSuite, void * inCont
         const struct spake2p_fe_rw_tv * vector = fe_rw_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.FELoad(vector->fe_in, vector->fe_in_len, spake2p.w0);
@@ -975,7 +1012,7 @@ static void TestSPAKE2P_spake2p_Mac(nlTestSuite * inSuite, void * inContext)
         const struct spake2p_hmac_tv * vector = hmac_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.Mac(vector->key, vector->key_len, vector->input, vector->input_len, mac);
@@ -1005,7 +1042,7 @@ static void TestSPAKE2P_spake2p_PointMul(nlTestSuite * inSuite, void * inContext
         const struct spake2p_point_mul_tv * vector = point_mul_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.PointLoad(vector->point, vector->point_len, spake2p.L);
@@ -1041,7 +1078,7 @@ static void TestSPAKE2P_spake2p_PointMulAdd(nlTestSuite * inSuite, void * inCont
         const struct spake2p_point_muladd_tv * vector = point_muladd_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.PointLoad(vector->point1, vector->point1_len, spake2p.X);
@@ -1083,7 +1120,7 @@ static void TestSPAKE2P_spake2p_PointLoadWrite(nlTestSuite * inSuite, void * inC
         const struct spake2p_point_rw_tv * vector = point_rw_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.PointLoad(vector->point, vector->point_len, spake2p.L);
@@ -1109,7 +1146,7 @@ static void TestSPAKE2P_spake2p_PointIsValid(nlTestSuite * inSuite, void * inCon
         const struct spake2p_point_valid_tv * vector = point_valid_tvs[vectorIndex];
 
         Spake2p_P256_SHA256_HKDF_HMAC spake2p;
-        CHIP_ERROR err = spake2p.Init(NULL, 0);
+        CHIP_ERROR err = spake2p.Init(nullptr, 0);
         NL_TEST_ASSERT(inSuite, err == CHIP_NO_ERROR);
 
         err = spake2p.PointLoad(vector->point, vector->point_len, spake2p.L);
@@ -1141,7 +1178,7 @@ public:
         return CHIP_NO_ERROR;
     }
 
-    CHIP_ERROR FEGenerate(void * feout) { return FELoad(fe, fe_len, feout); }
+    CHIP_ERROR FEGenerate(void * feout) override { return FELoad(fe, fe_len, feout); }
 
 private:
     uint8_t fe[kMAX_FE_Length];
@@ -1330,7 +1367,8 @@ static const nlTest sTests[] = {
     //NL_TEST_DEF("Test adding entropy sources", TestAddEntropySources),
     NL_TEST_DEF("Test PBKDF2 SHA256", TestPBKDF2_SHA256_TestVectors),
     NL_TEST_DEF("Test P256 Keygen", TestP256_Keygen),
-    //NL_TEST_DEF("Test CSR Generation", TestCSR_Gen),
+    NL_TEST_DEF("Test CSR Generation", TestCSR_Gen),
+    NL_TEST_DEF("Test Keypair Serialize", TestKeypair_Serialize),
     NL_TEST_DEF("Test Spake2p_spake2p FEMul", TestSPAKE2P_spake2p_FEMul),
     NL_TEST_DEF("Test Spake2p_spake2p FELoad/FEWrite", TestSPAKE2P_spake2p_FELoadWrite),
     NL_TEST_DEF("Test Spake2p_spake2p Mac", TestSPAKE2P_spake2p_Mac),
@@ -1350,18 +1388,15 @@ int TestCHIPCryptoPAL(void)
     {
         "CHIP Crypto PAL tests",
         &sTests[0],
-        NULL,
-        NULL
+        nullptr,
+        nullptr
     };
     // clang-format on
     // Run test suit againt one context.
-    nlTestRunner(&theSuite, NULL);
+    nlTestRunner(&theSuite, nullptr);
     mbedtls_platform_teardown(&pctx);
-    add_entropy_source(test_entropy_source, NULL, 16);
+    add_entropy_source(test_entropy_source, nullptr, 16);
     return (nlTestRunnerStats(&theSuite));
 }
 
-static void __attribute__((constructor)) TestCHIPCryptoCtor(void)
-{
-    VerifyOrDie(RegisterUnitTests(&TestCHIPCryptoPAL) == CHIP_NO_ERROR);
-}
+CHIP_REGISTER_TEST_SUITE(TestCHIPCryptoPAL)

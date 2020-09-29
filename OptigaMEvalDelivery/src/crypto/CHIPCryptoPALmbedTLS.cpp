@@ -20,7 +20,7 @@
  *      mbedTLS based implementation of CHIP crypto primitives
  */
 
- #define IFX_DBG(...) printf (__VA_ARGS__) 
+#define IFX_DBG(...) printf(__VA_ARGS__) 
  
 #include "CHIPCryptoPAL.h"
 
@@ -40,16 +40,11 @@
 #include <mbedtls/entropy_poll.h>
 
 #include <core/CHIPSafeCasts.h>
+#include <support/BufBound.h>
 #include <support/CodeUtils.h>
 #include <support/logging/CHIPLogging.h>
 
 #include <string.h>
-//#include <optiga/optiga_util.h>
-
-//extern "C" {
-
-//optiga_util_t * get_optiga_util(void);
-//};
 
 namespace chip {
 namespace Crypto {
@@ -106,21 +101,23 @@ CHIP_ERROR AES_CCM_encrypt(const uint8_t * plaintext, size_t plaintext_length, c
     mbedtls_ccm_context context;
     mbedtls_ccm_init(&context);
 
-    VerifyOrExit(plaintext != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(plaintext != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(plaintext_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(key != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(key != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(_isValidKeyLength(key_length), error = CHIP_ERROR_UNSUPPORTED_ENCRYPTION_TYPE);
-    VerifyOrExit(iv != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(iv != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(iv_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(tag != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(tag != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(_isValidTagLength(tag_length), error = CHIP_ERROR_INVALID_ARGUMENT);
     if (aad_length > 0)
     {
-        VerifyOrExit(aad != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+        VerifyOrExit(aad != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     }
 
     // Size of key = key_length * number of bits in a byte (8)
-    result = mbedtls_ccm_setkey(&context, MBEDTLS_CIPHER_ID_AES, Uint8::to_const_uchar(key), key_length * 8);
+    // Cast is safe because we called _isValidKeyLength above.
+    result =
+        mbedtls_ccm_setkey(&context, MBEDTLS_CIPHER_ID_AES, Uint8::to_const_uchar(key), static_cast<unsigned int>(key_length * 8));
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
     // Encrypt
@@ -145,21 +142,23 @@ CHIP_ERROR AES_CCM_decrypt(const uint8_t * ciphertext, size_t ciphertext_len, co
     mbedtls_ccm_context context;
     mbedtls_ccm_init(&context);
 
-    VerifyOrExit(ciphertext != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(ciphertext != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(ciphertext_len > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(tag != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(tag != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(_isValidTagLength(tag_length), error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(key != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(key != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(_isValidKeyLength(key_length), error = CHIP_ERROR_UNSUPPORTED_ENCRYPTION_TYPE);
-    VerifyOrExit(iv != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(iv != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(iv_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     if (aad_len > 0)
     {
-        VerifyOrExit(aad != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+        VerifyOrExit(aad != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     }
 
     // Size of key = key_length * number of bits in a byte (8)
-    result = mbedtls_ccm_setkey(&context, MBEDTLS_CIPHER_ID_AES, Uint8::to_const_uchar(key), key_length * 8);
+    // Cast is safe because we called _isValidKeyLength above.
+    result =
+        mbedtls_ccm_setkey(&context, MBEDTLS_CIPHER_ID_AES, Uint8::to_const_uchar(key), static_cast<unsigned int>(key_length * 8));
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
     // Decrypt
@@ -181,7 +180,7 @@ CHIP_ERROR Hash_SHA256(const uint8_t * data, const size_t data_length, uint8_t *
 
     // zero data length hash is supported.
 
-    VerifyOrExit(out_buffer != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(out_buffer != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     result = mbedtls_sha256_ret(Uint8::to_const_uchar(data), data_length, Uint8::to_uchar(out_buffer), 0);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
@@ -254,22 +253,22 @@ CHIP_ERROR HKDF_SHA256(const uint8_t * secret, const size_t secret_length, const
     int result       = 1;
     const mbedtls_md_info_t * md;
 
-    VerifyOrExit(secret != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(secret != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(secret_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     // Salt is optional
     if (salt_length > 0)
     {
-        VerifyOrExit(salt != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+        VerifyOrExit(salt != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     }
 
     VerifyOrExit(info_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(info != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(info != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(out_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(out_buffer != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(out_buffer != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     md = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    VerifyOrExit(md != NULL, error = CHIP_ERROR_INTERNAL);
+    VerifyOrExit(md != nullptr, error = CHIP_ERROR_INTERNAL);
 
     result = mbedtls_hkdf(md, Uint8::to_const_uchar(salt), salt_length, Uint8::to_const_uchar(secret), secret_length,
                           Uint8::to_const_uchar(info), info_length, Uint8::to_uchar(out_buffer), out_length);
@@ -291,15 +290,15 @@ CHIP_ERROR pbkdf2_sha256(const uint8_t * password, size_t plen, const uint8_t * 
 
     bool free_md_ctxt = false;
 
-    VerifyOrExit(password != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(password != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(plen > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(salt != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(salt != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(slen > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(key_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(output != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(output != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    VerifyOrExit(md_info != NULL, error = CHIP_ERROR_INTERNAL);
+    VerifyOrExit(md_info != nullptr, error = CHIP_ERROR_INTERNAL);
 
     mbedtls_md_init(&md_ctxt);
     free_md_ctxt = true;
@@ -344,8 +343,8 @@ static mbedtls_ctr_drbg_context * get_drbg_context()
 
     if (!context->mDRBGSeeded)
     {
-        int status = mbedtls_ctr_drbg_seed(drbgCtxt, mbedtls_entropy_func, &context->mEntropy, NULL, 0);
-    VerifyOrExit(status == 0, _log_mbedTLS_error(status));
+        int status = mbedtls_ctr_drbg_seed(drbgCtxt, mbedtls_entropy_func, &context->mEntropy, nullptr, 0);
+        VerifyOrExit(status == 0, _log_mbedTLS_error(status));
 
         context->mDRBGSeeded = true;
     }
@@ -375,22 +374,32 @@ exit:
 
 CHIP_ERROR DRBG_get_bytes(uint8_t * out_buffer, const size_t out_length)
 {
-    CHIP_ERROR error              = CHIP_NO_ERROR;
-    int result                    = 0;
-    size_t hw_out_length;
+    CHIP_ERROR error = CHIP_NO_ERROR;
+    int result       = 0;
+    size_t hw_out_length = 0;
+    size_t outcnt;
+
 
     mbedtls_ctr_drbg_context * drbg_ctxt = nullptr;
 
     VerifyOrExit(out_buffer != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(out_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-
+    
+    // mbedtls_hardware_poll() is max 256, need to segment
+    for(int cnt=0, inc ; cnt < out_length; ) {
+      inc = (out_length-cnt < 256 ? out_length-cnt : 256);
+      result = mbedtls_hardware_poll( NULL, &out_buffer[cnt], inc, &outcnt);
+      hw_out_length += outcnt;
+      cnt += inc;
+    }
+      
     IFX_DBG("IFX_>mbedtls_hardware_poll() inlength=>%d outlength=>%d\n", out_length, hw_out_length);
-    result = mbedtls_hardware_poll( NULL, out_buffer, out_length, &hw_out_length);
     //Normally comment this out as it produces a lot of data
-    //for(unsigned int i=0; i<(unsigned int) hw_out_length; i++) printf(" %0x", out_buffer[i]);
+    for(unsigned int i=0; i<(unsigned int) hw_out_length; i++) printf(" %0x", out_buffer[i]);
     IFX_DBG("\n");
+    //VerifyOrExit(drbg_ctxt != nullptr, error = CHIP_ERROR_INTERNAL);
 
-		VerifyOrExit(hw_out_length == out_length, error = CHIP_ERROR_INTERNAL);
+
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
 exit:
@@ -412,6 +421,13 @@ mbedtls_ecp_group_id MapECPGroupId(SupportedECPKeyTypes keyType)
         return MBEDTLS_ECP_DP_NONE;
     }
 }
+
+static inline mbedtls_ecp_keypair * to_keypair(P256KeypairContext * context)
+{
+    nlSTATIC_ASSERT_PRINT(sizeof(P256KeypairContext) >= sizeof(mbedtls_ecp_keypair), "Need more memory for mbedtls_ecp_keypair");
+    return reinterpret_cast<mbedtls_ecp_keypair *>(context->mBytes);
+}
+
 static inline const mbedtls_ecp_keypair * to_const_keypair(const P256KeypairContext * context)
 {
     nlSTATIC_ASSERT_PRINT(sizeof(P256KeypairContext) >= sizeof(mbedtls_ecp_keypair), "Need more memory for mbedtls_ecp_keypair");
@@ -423,31 +439,27 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
     CHIP_ERROR error = CHIP_NO_ERROR;
     int result       = 0;
     uint8_t hash[NUM_BYTES_IN_SHA256_HASH];
-    size_t siglen = out_signature.Capacity();
+    //size_t siglen = out_signature.Capacity();
     unsigned char r_len, s_len;
 
     mbedtls_mpi r;
 	  mbedtls_mpi s;
 
-    mbedtls_ecp_keypair keypair;
-    mbedtls_ecp_keypair_init(&keypair);
+    mbedtls_ecp_keypair * keypair = reinterpret_cast<mbedtls_ecp_keypair *> (&mKeypair);
 
-	  IFX_DBG("IFX_>ECDSA_sign_msg() entry...\n");
+    mbedtls_ecdsa_context ecdsa_ctxt;
+    mbedtls_ecdsa_init(&ecdsa_ctxt);
 
-    VerifyOrExit(msg != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(mInitialized, error = CHIP_ERROR_INCORRECT_STATE);
+    VerifyOrExit(msg != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(msg_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
-    result = mbedtls_ecp_group_load(&keypair.grp, MapECPGroupId(mPrivateKey.Type()));
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-
-    result = mbedtls_mpi_read_binary(&keypair.d, Uint8::to_const_uchar(mPrivateKey), mPrivateKey.Length());
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
-
-    result = mbedtls_sha256_ret(Uint8::to_const_uchar(msg), msg_length, hash, 0);
+    result = mbedtls_ecdsa_from_keypair(&ecdsa_ctxt, keypair);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
-
-		//IFX Version
+    result = mbedtls_sha256_ret(Uint8::to_const_uchar(msg), msg_length, hash, 0);
+   
+    //IFX Version
     mbedtls_mpi_init( &r );
     mbedtls_mpi_init( &s );
 
@@ -455,7 +467,7 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
     //d parameter contains OID within OptigaM rather than explicit value
     //For testing, the keypair is generated on Optiga in the test harness
   	IFX_DBG("IFX_>mbedtls_ecdsa_sign() call\n");
-    result = mbedtls_ecdsa_sign( &keypair.grp, &r, &s, &keypair.d, hash, sizeof(hash),  CryptoRNG, NULL);
+    result = mbedtls_ecdsa_sign( &(keypair->grp), &r, &s, &(keypair->d), hash, sizeof(hash),  CryptoRNG, NULL);
     IFX_DBG("IFX_>mbedtls_ecdsa_sign() returned=>%0x ...\n", result);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 		
@@ -483,12 +495,14 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
 
     SuccessOrExit(out_signature.SetLength(s_len+r_len+6));
      
-	IFX_DBG("IFX_>sig length=>%0x ...\n", out_signature[1]+2);
+	  IFX_DBG("IFX_>sig length=>%0x ...\n", out_signature[1]+2);
     for(unsigned int i=0; i<(unsigned int) (out_signature[1]+2); i++) printf(" %0x", out_signature[i]);
     IFX_DBG("\n");
 
+
 exit:
-    mbedtls_ecp_keypair_free(&keypair);
+    keypair = nullptr;
+    mbedtls_ecdsa_free(&ecdsa_ctxt);
     _log_mbedTLS_error(result);
     return error;
 }
@@ -507,8 +521,10 @@ CHIP_ERROR P256PublicKey::ECDSA_validate_msg_signature(const uint8_t * msg, cons
     mbedtls_ecp_keypair keypair;
     mbedtls_ecp_keypair_init(&keypair);
 
+    mbedtls_ecdsa_context ecdsa_ctxt;
+    mbedtls_ecdsa_init(&ecdsa_ctxt);
 
-    VerifyOrExit(msg != NULL, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(msg != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(msg_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     result = mbedtls_ecp_group_load(&keypair.grp, MapECPGroupId(Type()));
@@ -517,10 +533,13 @@ CHIP_ERROR P256PublicKey::ECDSA_validate_msg_signature(const uint8_t * msg, cons
     result = mbedtls_ecp_point_read_binary(&keypair.grp, &keypair.Q, Uint8::to_const_uchar(*this), Length());
     VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
-    result = mbedtls_sha256_ret(msg, msg_length, hash, 0);
+    result = mbedtls_ecdsa_from_keypair(&ecdsa_ctxt, &keypair);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
-		//IFX Optiga Version
+    result = mbedtls_sha256_ret(Uint8::to_const_uchar(msg), msg_length, hash, 0);
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+    
+    //IFX Optiga Version
     mbedtls_mpi_init( &r );
     mbedtls_mpi_init( &s );
    
@@ -544,9 +563,9 @@ CHIP_ERROR P256PublicKey::ECDSA_validate_msg_signature(const uint8_t * msg, cons
     IFX_DBG("IFX_>mbedtls_ecdsa_verify() returned=>%0x ...\n", result);
  
     VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_SIGNATURE);
-
 exit:
     mbedtls_ecp_keypair_free(&keypair);
+    mbedtls_ecdsa_free(&ecdsa_ctxt);
     _log_mbedTLS_error(result);
     return error;
 }
@@ -555,8 +574,8 @@ exit:
 // Note that IFX Optiga version uses OID address in private key data
 CHIP_ERROR P256Keypair::ECDH_derive_secret(const P256PublicKey & remote_public_key, P256ECDHDerivedSecret & out_secret) const
 {
-    CHIP_ERROR error = CHIP_NO_ERROR;
-    int result       = 0;
+    CHIP_ERROR error     = CHIP_NO_ERROR;
+    int result           = 0;
     size_t secret_length = (out_secret.Length() == 0) ? out_secret.Capacity() : out_secret.Length();
 
     mbedtls_ecp_group ecp_grp;
@@ -568,26 +587,20 @@ CHIP_ERROR P256Keypair::ECDH_derive_secret(const P256PublicKey & remote_public_k
     mbedtls_ecp_point ecp_pubkey;
     mbedtls_ecp_point_init(&ecp_pubkey);
 
-    mbedtls_mpi mpi_privkey;
-    mbedtls_mpi_init(&mpi_privkey);
+   const mbedtls_ecp_keypair * keypair = to_const_keypair(&mKeypair);
 
-    mbedtls_ecdh_context ecdh_ctxt;
-    mbedtls_ecdh_init(&ecdh_ctxt);
 
-    VerifyOrExit(remote_public_key.Type() == mPrivateKey.Type(), error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(mInitialized, error = CHIP_ERROR_INCORRECT_STATE);
 
-    result = mbedtls_ecp_group_load(&ecp_grp, MapECPGroupId(mPrivateKey.Type()));
+    result = mbedtls_ecp_group_load(&ecp_grp, MapECPGroupId(remote_public_key.Type()));
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
-
-    result = mbedtls_mpi_read_binary(&mpi_privkey, Uint8::to_const_uchar(mPrivateKey), mPrivateKey.Length());
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     result =
         mbedtls_ecp_point_read_binary(&ecp_grp, &ecp_pubkey, Uint8::to_const_uchar(remote_public_key), remote_public_key.Length());
     VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
-	  printf("IFX_>mbedtls_ecdh_compute_shared() call...\n");
-    result = mbedtls_ecdh_compute_shared(&ecp_grp, &mpi_secret, &ecp_pubkey, &mpi_privkey, CryptoRNG, NULL);
+    printf("IFX_>mbedtls_ecdh_compute_shared() call...\n");
+    result = mbedtls_ecdh_compute_shared(&ecp_grp, &mpi_secret, &ecp_pubkey,  &keypair->d, CryptoRNG, NULL);
     printf("IFX_>mbedtls_ecdh_compute_shared() returned=>%0x ...\n", result);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
@@ -596,11 +609,10 @@ CHIP_ERROR P256Keypair::ECDH_derive_secret(const P256PublicKey & remote_public_k
     SuccessOrExit(out_secret.SetLength(secret_length));
 
 exit:
-    mbedtls_ecdh_free(&ecdh_ctxt);
+    keypair = nullptr;
     mbedtls_ecp_group_free(&ecp_grp);
     mbedtls_mpi_free(&mpi_secret);
     mbedtls_ecp_point_free(&ecp_pubkey);
-    mbedtls_mpi_free(&mpi_privkey);
     _log_mbedTLS_error(result);
     return error;
 }
@@ -619,28 +631,98 @@ CHIP_ERROR P256Keypair::Initialize()
 
     mbedtls_ecp_group_id group = MapECPGroupId(mPublicKey.Type());
 
-    mbedtls_ecp_keypair keypair;
-    mbedtls_ecp_keypair_init(&keypair);
+    mbedtls_ecp_keypair * keypair = to_keypair(&mKeypair);
+    mbedtls_ecp_keypair_init(keypair);
 
-    VerifyOrExit(group == MapECPGroupId(mPrivateKey.Type()), error = CHIP_ERROR_INVALID_ARGUMENT);
-
-    result = mbedtls_ecp_gen_key(group, &keypair, CryptoRNG, nullptr);
+    result = mbedtls_ecp_gen_key(group, keypair, CryptoRNG, nullptr);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
-    result = mbedtls_ecp_point_write_binary(&keypair.grp, &keypair.Q, MBEDTLS_ECP_PF_UNCOMPRESSED, &pubkey_size,
+    result = mbedtls_ecp_point_write_binary(&keypair->grp, &keypair->Q, MBEDTLS_ECP_PF_UNCOMPRESSED, &pubkey_size,
                                             Uint8::to_uchar(mPublicKey), mPublicKey.Length());
     VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(pubkey_size == mPublicKey.Length(), error = CHIP_ERROR_INVALID_ARGUMENT);
 
-    VerifyOrExit(mbedtls_mpi_size(&keypair.d) == mPrivateKey.Length(), error = CHIP_ERROR_INVALID_ARGUMENT);
-
-    result = mbedtls_mpi_write_binary(&keypair.d, Uint8::to_uchar(mPrivateKey), mPrivateKey.Length());
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
+    keypair      = nullptr;
+    mInitialized = true;
 
 exit:
-    mbedtls_ecp_keypair_free(&keypair);
+    if (keypair != nullptr)
+    {
+        mbedtls_ecp_keypair_free(keypair);
+        keypair = nullptr;
+    }
+
     _log_mbedTLS_error(result);
     return error;
+}
+
+CHIP_ERROR P256Keypair::Serialize(P256SerializedKeypair & output)
+{
+    const mbedtls_ecp_keypair * keypair = to_const_keypair(&mKeypair);
+    size_t len                          = output.Length() == 0 ? output.Capacity() : output.Length();
+    BufBound bbuf(output, len);
+    uint8_t privkey[kP256_PrivateKey_Length];
+    CHIP_ERROR error = CHIP_NO_ERROR;
+    int result       = 0;
+
+    bbuf.Put(mPublicKey, mPublicKey.Length());
+
+    VerifyOrExit(bbuf.Available() == sizeof(privkey), error = CHIP_ERROR_INTERNAL);
+    VerifyOrExit(mbedtls_mpi_size(&keypair->d) == bbuf.Available(), error = CHIP_ERROR_INTERNAL);
+
+    result = mbedtls_mpi_write_binary(&keypair->d, Uint8::to_uchar(privkey), sizeof(privkey));
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+
+    bbuf.Put(privkey, sizeof(privkey));
+    VerifyOrExit(bbuf.Fit(), error = CHIP_ERROR_NO_MEMORY);
+
+    output.SetLength(bbuf.Written());
+
+exit:
+    memset(privkey, 0, sizeof(privkey));
+    _log_mbedTLS_error(result);
+    return error;
+}
+
+CHIP_ERROR P256Keypair::Deserialize(P256SerializedKeypair & input)
+{
+    BufBound bbuf(mPublicKey, mPublicKey.Length());
+
+    int result       = 0;
+    CHIP_ERROR error = CHIP_NO_ERROR;
+
+    mbedtls_ecp_keypair * keypair = to_keypair(&mKeypair);
+    mbedtls_ecp_keypair_init(keypair);
+
+    result = mbedtls_ecp_group_load(&keypair->grp, MapECPGroupId(mPublicKey.Type()));
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+
+    VerifyOrExit(input.Length() == mPublicKey.Length() + kP256_PrivateKey_Length, error = CHIP_ERROR_INVALID_ARGUMENT);
+    bbuf.Put((const uint8_t *) input, mPublicKey.Length());
+    VerifyOrExit(bbuf.Fit(), error = CHIP_ERROR_NO_MEMORY);
+
+    result = mbedtls_ecp_point_read_binary(&keypair->grp, &keypair->Q, Uint8::to_const_uchar(mPublicKey), mPublicKey.Length());
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
+
+    {
+        const uint8_t * privkey = Uint8::to_const_uchar(input) + mPublicKey.Length();
+        result                  = mbedtls_mpi_read_binary(&keypair->d, privkey, kP256_PrivateKey_Length);
+        VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
+    }
+    mInitialized = true;
+
+exit:
+    _log_mbedTLS_error(result);
+    return error;
+}
+
+P256Keypair::~P256Keypair()
+{
+    if (mInitialized)
+    {
+        mbedtls_ecp_keypair * keypair = to_keypair(&mKeypair);
+        mbedtls_ecp_keypair_free(keypair);
+    }
 }
 
 CHIP_ERROR P256Keypair::NewCertificateSigningRequest(uint8_t * out_csr, size_t & csr_length)
@@ -673,7 +755,7 @@ CHIP_ERROR P256Keypair::NewCertificateSigningRequest(uint8_t * out_csr, size_t &
 
     result = mbedtls_x509write_csr_pem(&csr, out_csr, length, CryptoRNG, nullptr);
     VerifyOrExit(result >= 0, error = CHIP_ERROR_INTERNAL);
-    csr_length = result;
+    csr_length = static_cast<unsigned int>(result);
     result     = 0;
 
 exit:
@@ -683,7 +765,6 @@ exit:
     mbedtls_pk_free(&pk);
     _log_mbedTLS_error(result);
     return error;
-
 }
 
 typedef struct Spake2p_Context
@@ -723,7 +804,7 @@ CHIP_ERROR Spake2p_P256_SHA256_HKDF_HMAC::InitInternal(void)
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
     context->md_info = mbedtls_md_info_from_type(MBEDTLS_MD_SHA256);
-    VerifyOrExit(context->md_info != NULL, error = CHIP_ERROR_INTERNAL);
+    VerifyOrExit(context->md_info != nullptr, error = CHIP_ERROR_INTERNAL);
 
     mbedtls_ecp_point_init(&context->M);
     mbedtls_ecp_point_init(&context->N);
@@ -964,7 +1045,7 @@ CHIP_ERROR Spake2p_P256_SHA256_HKDF_HMAC::PointAddMul(void * R, const void * P1,
 
 CHIP_ERROR Spake2p_P256_SHA256_HKDF_HMAC::PointInvert(void * R)
 {
-    mbedtls_ecp_point * Rp = (mbedtls_ecp_point *) R;
+    mbedtls_ecp_point * Rp    = (mbedtls_ecp_point *) R;
     Spake2p_Context * context = to_inner_spake2p_context(&mSpake2pContext);
 
     if (mbedtls_mpi_sub_mpi(&Rp->Y, &context->curve.P, &Rp->Y) != 0)
