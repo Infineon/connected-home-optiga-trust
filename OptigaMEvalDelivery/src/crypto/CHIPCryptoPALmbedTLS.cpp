@@ -60,8 +60,6 @@ typedef struct
     mbedtls_entropy_context mEntropy;
 } EntropyContext;
 
-static EntropyContext gsEntropyContext;
-
 static void _log_mbedTLS_error(int error_code)
 {
     if (error_code != 0)
@@ -322,56 +320,6 @@ exit:
     return error;
 }
 
-static EntropyContext * get_entropy_context()
-{
-    if (!gsEntropyContext.mInitialized)
-    {
-        mbedtls_entropy_init(&gsEntropyContext.mEntropy);
-        mbedtls_ctr_drbg_init(&gsEntropyContext.mDRBGCtxt);
-
-        gsEntropyContext.mInitialized = true;
-    }
-
-    return &gsEntropyContext;
-}
-
-static mbedtls_ctr_drbg_context * get_drbg_context()
-{
-    EntropyContext * context = get_entropy_context();
-
-    mbedtls_ctr_drbg_context * drbgCtxt = &context->mDRBGCtxt;
-
-    if (!context->mDRBGSeeded)
-    {
-        int status = mbedtls_ctr_drbg_seed(drbgCtxt, mbedtls_entropy_func, &context->mEntropy, nullptr, 0);
-        VerifyOrExit(status == 0, _log_mbedTLS_error(status));
-
-        context->mDRBGSeeded = true;
-    }
-
-    return drbgCtxt;
-
-exit:
-    return nullptr;
-}
-
-CHIP_ERROR add_entropy_source(entropy_source fn_source, void * p_source, size_t threshold)
-{
-    CHIP_ERROR error              = CHIP_NO_ERROR;
-    int result                    = 0;
-    EntropyContext * entropy_ctxt = nullptr;
-
-    VerifyOrExit(fn_source != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
-
-    entropy_ctxt = get_entropy_context();
-    VerifyOrExit(entropy_ctxt != nullptr, error = CHIP_ERROR_INTERNAL);
-
-    result = mbedtls_entropy_add_source(&entropy_ctxt->mEntropy, fn_source, p_source, threshold, MBEDTLS_ENTROPY_SOURCE_STRONG);
-    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
-exit:
-    return error;
-}
-
 CHIP_ERROR DRBG_get_bytes(uint8_t * out_buffer, const size_t out_length)
 {
     CHIP_ERROR error = CHIP_NO_ERROR;
@@ -379,14 +327,11 @@ CHIP_ERROR DRBG_get_bytes(uint8_t * out_buffer, const size_t out_length)
     size_t hw_out_length = 0;
     size_t outcnt;
 
-
-    mbedtls_ctr_drbg_context * drbg_ctxt = nullptr;
-
     VerifyOrExit(out_buffer != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(out_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     
     // mbedtls_hardware_poll() is max 256, need to segment
-    for(int cnt=0, inc ; cnt < out_length; ) {
+    for(size_t cnt=0, inc ; cnt < out_length; ) {
       inc = (out_length-cnt < 256 ? out_length-cnt : 256);
       result = mbedtls_hardware_poll( NULL, &out_buffer[cnt], inc, &outcnt);
       hw_out_length += outcnt;

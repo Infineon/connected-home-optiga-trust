@@ -61,13 +61,7 @@
 using namespace chip;
 using namespace chip::Crypto;
 
-static uint32_t gs_test_entropy_source_called = 0;
-static int test_entropy_source(void * data, uint8_t * output, size_t len, size_t * olen)
-{
-    *olen = len;
-    gs_test_entropy_source_called++;
-    return 0;
-}
+
 extern "C" {
 int trustm_init(void);
 int trustm_deinit(void);
@@ -616,9 +610,10 @@ static void TestDRBG_InvalidInputs(nlTestSuite * inSuite, void * inContext)
 static void TestDRBG_Output(nlTestSuite * inSuite, void * inContext)
 {
     // No good way to unit test a DRBG. Just validate that we get out something
+    // Test 256 byte segmentation for OPTIGA-M implementation
     CHIP_ERROR error     = CHIP_ERROR_INVALID_ARGUMENT;
-    uint8_t out_buf[512]  = { 0 };
-    uint8_t orig_buf[512] = { 0 };
+    uint8_t out_buf[270]  = { 0 };
+    uint8_t orig_buf[270] = { 0 };
 
     error = DRBG_get_bytes(out_buf, sizeof(out_buf));
     NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
@@ -693,11 +688,11 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
     //Copy public key to Public Key member
     memcpy(Uint8::to_uchar((*keypairIn).mPublicKey), &hex_public_key_buffer[3], (*keypairIn).mPublicKey.Length()); 
     //public & private to keypair member
-        /*result =*/ mbedtls_ecp_point_read_binary(&mbed_keypair->grp, &mbed_keypair->Q, &hex_public_key_buffer[3], (*keypairIn).mPublicKey.Length());
-        /* result =*/  mbedtls_mpi_read_binary(&mbed_keypair->d, hex_private_key_buffer, private_key_buffer_length);
-    //memcpy(Uint8::to_uchar((*keypairIn).mPrivateKey), &privkey_oid, 2); 
-    //Zero fill unused locations so that the user can see whether it's explicit private key data or an OPTIGA M OID
-    //memset(Uint8::to_uchar(&(*keypairIn).mPrivateKey[2]), 0 , (*keypairIn).mPrivateKey.Length()-2);  
+    CHIP_ERROR err=  mbedtls_ecp_point_read_binary(&mbed_keypair->grp, &mbed_keypair->Q, &hex_public_key_buffer[3], (*keypairIn).mPublicKey.Length());
+    NL_TEST_ASSERT(inSuite, err  == CHIP_NO_ERROR);
+    err = mbedtls_mpi_read_binary(&mbed_keypair->d, hex_private_key_buffer, private_key_buffer_length);
+    NL_TEST_ASSERT(inSuite, err  == CHIP_NO_ERROR);
+ 
     cleanup();
 }
 
@@ -851,16 +846,18 @@ static void TestAddEntropySources(nlTestSuite * inSuite, void * inContext)
 #if CHIP_CRYPTO_MBEDTLS
 static void TestAddEntropySources(nlTestSuite * inSuite, void * inContext)
 {
-    CHIP_ERROR error = add_entropy_source(test_entropy_source, nullptr, 10);
-    NL_TEST_ASSERT(inSuite, error == CHIP_NO_ERROR);
-    uint8_t buffer[5];
-    uint32_t test_entropy_source_call_count = gs_test_entropy_source_called;
-    NL_TEST_ASSERT(inSuite, DRBG_get_bytes(buffer, sizeof(buffer)) == CHIP_NO_ERROR);
-    for (int i = 0; i < 5000 * 2; i++)
+    //Adding Entropy Sources doesn't make sense on OPTIGA-M, just run several tests & verify output different each time
+   uint8_t buffer1[315];
+   uint8_t buffer2[315];
+  for (int i = 0; i < 20; i++)
     {
-        (void) DRBG_get_bytes(buffer, sizeof(buffer));
+        (void) DRBG_get_bytes(buffer1, sizeof(buffer1));
+        NL_TEST_ASSERT(inSuite, memcmp(buffer1, buffer2, sizeof(buffer1)) != 0);
+        (void) DRBG_get_bytes(buffer2, sizeof(buffer1));
+        NL_TEST_ASSERT(inSuite, memcmp(buffer1, buffer2, sizeof(buffer1)) != 0);
+ 
     }
-    NL_TEST_ASSERT(inSuite, gs_test_entropy_source_called > test_entropy_source_call_count);
+
 }
 #endif
 
@@ -1366,7 +1363,7 @@ static const nlTest sTests[] = {
     NL_TEST_DEF("Test DRBG invalid inputs", TestDRBG_InvalidInputs),
     NL_TEST_DEF("Test DRBG output", TestDRBG_Output),
     NL_TEST_DEF("Test ECDH derive shared secret", TestECDH_EstablishSecret),
-    //NL_TEST_DEF("Test adding entropy sources", TestAddEntropySources),
+    NL_TEST_DEF("Test adding entropy sources", TestAddEntropySources),
     NL_TEST_DEF("Test PBKDF2 SHA256", TestPBKDF2_SHA256_TestVectors),
     NL_TEST_DEF("Test P256 Keygen", TestP256_Keygen),
     NL_TEST_DEF("Test CSR Generation", TestCSR_Gen),
@@ -1397,7 +1394,6 @@ int TestCHIPCryptoPAL(void)
     // Run test suit againt one context.
     nlTestRunner(&theSuite, nullptr);
     mbedtls_platform_teardown(&pctx);
-    add_entropy_source(test_entropy_source, nullptr, 16);
     return (nlTestRunnerStats(&theSuite));
 }
 
