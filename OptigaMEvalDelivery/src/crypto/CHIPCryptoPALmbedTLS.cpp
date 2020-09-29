@@ -466,7 +466,7 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
     r_len = mbedtls_mpi_size(&r);
     s_len = mbedtls_mpi_size(&s);
 
-    printf("IFX_> r,s lengths=>%0x , %0x ...\n", r_len, s_len);
+    IFX_DBG("IFX_> r,s lengths=>%0x , %0x ...\n", r_len, s_len);
     out_signature[0] = 0x30;
     out_signature[1] = s_len+r_len+4;
     out_signature[2] = 0x02;
@@ -483,7 +483,7 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
 
     SuccessOrExit(out_signature.SetLength(s_len+r_len+6));
      
-	  IFX_DBG("IFX_>sig length=>%0x ...\n", out_signature[1]+2);
+	IFX_DBG("IFX_>sig length=>%0x ...\n", out_signature[1]+2);
     for(unsigned int i=0; i<(unsigned int) (out_signature[1]+2); i++) printf(" %0x", out_signature[i]);
     IFX_DBG("\n");
 
