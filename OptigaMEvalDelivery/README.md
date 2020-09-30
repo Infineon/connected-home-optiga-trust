@@ -84,22 +84,22 @@ user@user:/home/pi$ git clone https://github.com/Infineon/optiga-trust-m
 
 Note that the CHIP codebase is continually changing. Any updates to these files since commit 1fc71d8f6a798ccbf02af0c2ed1e0f5b37e0a529 dated 22 September 2020 will have to be merged into these files.
 
-* [MBedTLS/config.h](MBedTLS/config.h) -> /connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
-* [MBedTLS/Makefile.am](MBedTLS/Makefile.am) -> /connectedhomeip/third_party/mbedtls - automake file to build OPTIGA M SW
-* [MBedTLS/platform_alt.h](MBedTLS/platform_alt.h) -> /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
+* [MBedTLS/config.h](MBedTLS/config.h) -> `/connectedhomeip/third_party/mbedtls/repo/include/mbedtls` - config file to enable HW accellerator
+* [MBedTLS/Makefile.am](MBedTLS/Makefile.am) -> `/connectedhomeip/third_party/mbedtls` - automake file to build OPTIGA M SW
+* [MBedTLS/platform_alt.h](MBedTLS/platform_alt.h) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include` - init function declarations
 
-* [src/crypto/Makefile.am](src/crypto/Makefile.am) -> /connectedhomeip/src/crypto - automake file to build crypto driver
-* [src/crypto/CHIPCryptoPALmbedTLS.cpp](src/crypto/CHIPCryptoPALmbedTLS.cpp) -> /connectedhomeip/src/crypto - OPTIGA M crypto driver
-* [src/crypto/tests/Makefile.am](src/crypto/tests/Makefile.am) -> /connectedhomeip/src/crypto - automake file to build crypto driver tests
-* [src/crypto/CHIPCryptoPALTest.cpp](src/crypto/CHIPCryptoPALTest.cpp) -> /connectedhomeip/src/crypto - OPTIGA M crypto driver tests
+* [src/crypto/Makefile.am](src/crypto/Makefile.am) -> `/connectedhomeip/src/crypto` - automake file to build crypto driver
+* [src/crypto/CHIPCryptoPALmbedTLS.cpp](src/crypto/CHIPCryptoPALmbedTLS.cpp) -> `/connectedhomeip/src/crypto` - OPTIGA M crypto driver
+* [src/crypto/tests/Makefile.am](src/crypto/tests/Makefile.am) -> `/connectedhomeip/src/crypto` - automake file to build crypto driver tests
+* [src/crypto/CHIPCryptoPALTest.cpp](src/crypto/CHIPCryptoPALTest.cpp) -> `/connectedhomeip/src/crypto` - OPTIGA M crypto driver tests
 
 (In future OPTIGA M Files direcly from IFX repo, no need to overwrite ??)
-* [OptigaMMbedTLS/trustm_ecdh.c](OptigaMMbedTLS/trustm_ecdh.c) ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDH implementation using OptigaM
-* [OptigaMMbedTLS/trustm_ecdsa.c](OptigaMMbedTLS/trustm_ecdsa.c) ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDSA implementation using OptigaM
-* [OptigaMMbedTLS/trustm_random.c](OptigaMMbedTLS/trustm_random.c) ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed MBedTLS RNG implementation using OptigaM
-* [OptigaMMbedTLS/trustm_init.c](OptigaMMbedTLS/trustm_init.c) ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using MBedTLS API
+* [OptigaMMbedTLS/trustm_ecdh.c](OptigaMMbedTLS/trustm_ecdh.c) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port` - modified MBedTLS ECDH implementation using OptigaM
+* [OptigaMMbedTLS/trustm_ecdsa.c](OptigaMMbedTLS/trustm_ecdsa.c) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port` - modified MBedTLS ECDSA implementation using OptigaM
+* [OptigaMMbedTLS/trustm_random.c](OptigaMMbedTLS/trustm_random.c) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port` - fixed MBedTLS RNG implementation using OptigaM
+* [OptigaMMbedTLS/trustm_init.c](OptigaMMbedTLS/trustm_init.c) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port` - new OPTIGA M Init routine using MBedTLS API
 
-## 8 - Modify `optiga_lib_config.h`
+## 8 - Modify `optiga_lib_config.h` in `/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include`
 
 ```
  #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
