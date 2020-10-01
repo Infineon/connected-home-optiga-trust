@@ -22,33 +22,26 @@ Then, to build the code:
 user@user:/home/pi$ git clone https://github.com/project-chip/connectedhomeip
 ```
 
-## 2 - Build the standard CHIP code as per instructions - this will prompt to bring in any other tools you don't yet have (refer to build instructions to see additional tools required)
+## 2 - Create a build directory and create a custom version (i.e. using MbedTLS rather than OpenSSL). Here we use "ifx" as the directory name as an example
 
 ```console
 user@user:/home/pi$ cd connectedhomeip
-user@user:/home/pi$ ./bootstrap
-user@user:/home/pi$ make -f Makefile-Standalone
+user@user:/home/pi/connectedhomeip$ mkdir build/ifx
+user@user:/home/pi/connectedhomeip$ cd build/ifx
+user@user:/home/pi/connectedhomeip/build/ifx$ ../../configure -C --with-crypto=mbedtls
 ```
 
-## 3 - Create a build directory and create a custom version (i.e. using MbedTLS rather than OpenSSL). Here we use "ifx" as the directory name as an example
+## 3 - Build the MbedTLS SW implementation in this build directory
 
 ```console
-user@user:/home/pi$ mkdir build/ifx
-user@user:/home/pi$ cd build/ifx
-user@user:/home/pi$ ../../configure -C --with-crypto=mbedtls
+user@user:/home/pi/connectedhomeip/build/ifx$ ../../bootstrap
+user@user:/home/pi/connectedhomeip/build/ifx$ make -C third_party/mbedtls 
 ```
 
-## 4 - Build the MbedTLS SW implementation in this build directory
+## 4 - Run the crypto tests on the standard CHIP code with MbedTLS in SW as a sanity test
 
 ```console
-user@user:/home/pi$ ../../bootstrap
-user@user:/home/pi$ make -C third_party/mbedtls 
-```
-
-## 5 - Run the crypto tests on the standard CHIP code with MbedTLS in SW as a sanity test
-
-```console
-user@user:/home/pi$ make -C src/crypto clean check
+user@user:/home/pi/connectedhomeip/build/ifx$ make -C src/crypto clean check
 ```
 
 You should see the following summary:
@@ -68,21 +61,22 @@ You should see the following summary:
 If any tests fail - look at the crypto test log file
 
 ```console
-user@user:/home/pi$ clear;cat src/crypto/tests/TestCryptoPAL.log
+user@user:/home/pi/connectedhomeip/build/ifx$ clear;cat src/crypto/tests/TestCryptoPAL.log
 ```
 
 Now that the SW MbedTLS implementation is build and tested, overwrite the SW MbedTLS files with the ones to enable the OPTIGA M
 
-## 6 - Get the OPTIGA M Files from Infineon 
+## 5 - Get the OPTIGA M Files from Infineon 
 
 ```console
-user@user:/home/pi$ cd ../../third_party/mbedtls/
-user@user:/home/pi$ git clone https://github.com/Infineon/optiga-trust-m
+user@user:/home/pi/connectedhomeip/build/ifx$ cd ../../third_party/mbedtls/
+user@user:/home/piconnectedhomeip//third_party/mbedtls$ git clone https://github.com/Infineon/optiga-trust-m
 ```
 
-## 7 - Merge the attached files with the original files
+## 6 - Merge the attached files with the original files
 
-Note that the CHIP codebase is continually changing. Any updates to these files since commit 1fc71d8f6a798ccbf02af0c2ed1e0f5b37e0a529 dated 22 September 2020 will have to be merged into these files.
+Note that the CHIP codebase is continually changing. Any updates to these files since commit [`3b0835852afb3a5d11e94bfc43cf2d326d379ed2`](https://github.com/project-chip/connectedhomeip/tree/3b0835852afb3a5d11e94bfc43cf2d326d379ed2) dated 25 September 2020.
+
 
 * [MBedTLS/config.h](MBedTLS/config.h) -> `/connectedhomeip/third_party/mbedtls/repo/include/mbedtls` - config file to enable HW accellerator
 * [MBedTLS/Makefile.am](MBedTLS/Makefile.am) -> `/connectedhomeip/third_party/mbedtls` - automake file to build OPTIGA M SW
@@ -99,14 +93,14 @@ Note that the CHIP codebase is continually changing. Any updates to these files 
 * [OptigaMMbedTLS/trustm_random.c](OptigaMMbedTLS/trustm_random.c) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port` - fixed MBedTLS RNG implementation using OptigaM
 * [OptigaMMbedTLS/trustm_init.c](OptigaMMbedTLS/trustm_init.c) -> `/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port` - new OPTIGA M Init routine using MBedTLS API
 
-## 8 - Modify `optiga_lib_config.h` in `/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include`
+## 7 - Modify `optiga_lib_config.h` in `/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include`
 
 ```
  #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
  //#define OPTIGA_COMMS_SHIELDED_CONNECTION  Disable shielded connection
 ```
 
-## 9 Edit `CHIPCryptoPAL.h` to make the members of class P256Keypair public:
+## 8 Edit `CHIPCryptoPAL.h` to make the members of class P256Keypair public:
 
 ```cpp
 public:
@@ -117,19 +111,19 @@ public:
 ```
 
 
-## 10 - Rebuild the MbedTLS SW implementation, now using the OPTIGA M
+## 9 - Rebuild the MbedTLS SW implementation, now using the OPTIGA M
 
 ```console
-user@user:/home/pi$ cd ../../build/ifx
-user@user:/home/pi$ ../../bootstrap 
-user@user:/home/pi$ make -C third_party/mbedtls clean
-user@user:/home/pi$ make -C third_party/mbedtls 
+user@user:/home/pi/third_party/mbedtls$ cd ../../build/ifx
+user@user:/home/pi/connectedhomeip/build/ifx$ ../../bootstrap 
+user@user:/home/pi/connectedhomeip/build/ifx$ make -C third_party/mbedtls clean
+user@user:/home/pi/connectedhomeip/build/ifx$ make -C third_party/mbedtls 
 ```
 
-## 11 - Run the crypto tests on the CHIP code with OPTIGA M 
+## 10 - Run the crypto tests on the CHIP code with OPTIGA M 
 
 ```console
-user@user:/home/pi$ make -C src/crypto clean check
+user@user:/home/pi/connectedhomeip/build/ifx$ make -C src/crypto clean check
 ```
 
 **Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedTLS.cpp & ChipCryptoPALTest.cpp using the macro IFX_DBG(...) printf(__VA_ARGS__). This macro may be redefined as needed (i.e. stubbed out to supress debug messages)**
