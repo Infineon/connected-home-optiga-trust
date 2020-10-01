@@ -136,9 +136,9 @@ The two files that really matter:
 - `connectedhomeip/src/crypto/CHIPCryptoPALmbedTLS.cpp` - The main file of interest. This implements CHIP crypto by making calls to an mbedTLS library underneath. The file has been modified to allow the calls to asymmetric crypto. to be implemented by the OptigaM implementation of mbedTLS.
 
 - `connectedhomeip/src/crypto/tests/ChipCryptoPALTest.cpp` - This file implements the crypto tests. Some tests have been modified to allow for OptigaM impelmentation. In
-particular we cannot import private key test vectors, so the tests must create the keypair on the Optiga and then export the public key from the Optiga to the test harness. As this SW is still work in progress we have made the key data public in the SW structures, as a way of getting things working in the short term with minimum complexity. In the longer term - once the SW is stable - we can modify the code to encapsulate as much key data as feasible.
+particular private key test vectors cannot be imported , so the tests must create the keypair on the Optiga and then export the public key from the Optiga to the test harness. As this SW is still work in progress it is necessary to make the key data public in the SW structures, as a way of getting things working in the short term with minimum complexity. In the longer term - once the SW is stable - the code should be modified to encapsulate as much key data as feasible.
 
-However, the keys are generated purely for testing of the crypto functionality. System wide management of the keys is considered out of scope for this work. (My guess is this will be customer specific and should certainly be managed in detail by the customer. Taking our off the shelf solution as a black box would seem a very dangerous thing for an OEM customer to do)
+However, the keys are generated purely for testing of the crypto functionality. System wide management of the keys is considered out of scope for this work. (The intention is thar this will be customer specific and should certainly be managed in detail by the customer. 
 
 Also, there's currently no shielded connection currently in place in order to get up & running as easily as possible.
 
