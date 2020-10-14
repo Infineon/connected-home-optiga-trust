@@ -55,22 +55,31 @@ root@raspberrypi:/home/pi/connectedhomeip/third_party/mbedtls# git clone https:/
 Note that the CHIP codebase is continually changing. Any updates to these files since commit xxx will have to be merged into these files.
 
 MBedTLS/config.h -> /connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
+
 MBedTLS/BUILD.gn -> /connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
+
 MBedTLS/platform_alt.h -> /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
 
 src/crypto/BUILD.gn -> /connectedhomeip/src/crypto - automake file to build crypto driver
+
 src/crypto/CHIPCryptoPALmbedTLS.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver
+
 src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto - gn  file to build crypto driver tests
+
 src/crypto/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver tests
 
 (In future OPTIGA M Files direcly from IFX repo, no need to overwrite ??)
 OptigaMMbedTLS/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDH implementation using OptigaM
+
 OptigaMMbedTLS/trustm_ecdsa.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDSA implementation using OptigaM
+
 OptigaMMbedTLS/trustm_random.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed MBedTLS RNG implementation using OptigaM
+
 OptigaMMbedTLS/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using MBedTLS API
 
 ## 8 - Modify optiga_lib_config.h
 #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
+
 //#define OPTIGA_COMMS_SHIELDED_CONNECTION  Disable shielded connection
 
 ## 9  - Edit CHIPCryptoPAL.h to make the members of class P256Keypair public:
