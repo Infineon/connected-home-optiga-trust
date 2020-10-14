@@ -84,9 +84,13 @@ OptigaMMbedTLS/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust
 
 ## 9  - Edit CHIPCryptoPAL.h to make the members of class P256Keypair public:
 public:
+
     P256PublicKey mPublicKey;
+    
     P256KeypairContext mKeypair;
+    
     bool mInitialized = false;
+    
 };
 
 ## 10 - Rebuild with warnings allowed
