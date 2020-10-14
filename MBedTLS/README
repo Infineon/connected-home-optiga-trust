@@ -1,6 +1,6 @@
-This directory contains the .am file that has been modified to add the OptigaM Files to the build system.
+This directory contains the BUILD.Gn file that has been modified to add the OptigaM Files to the build system.
 
-The .am file at the following location should be modified:
+The BUILD.Gn file at the following location should be modified:
 
 /connectedhomeip/third_party/mbedtls
 

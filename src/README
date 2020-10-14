@@ -1,4 +1,4 @@
-This directory contains the source and .am file changes that are needed to enable the CHIP crypto tests to use the OptigaM rather than the SW MbedTLS engine
+This directory contains the source and BUILD.gn file changes that are needed to enable the CHIP crypto tests to use the OptigaM rather than the SW MbedTLS engine
 
 In order to use the OPTIGA M there are two main functional changes:
 

@@ -2,7 +2,7 @@ This directory contains the OptigaM Files that have been modified for the Optiga
 
 They should part of the OptigaM files system, but are included for completeness.
 
-With the Automake file structure, these files should be places at:
+With the GN build file structure, these files should be places at:
 
 /connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
 
