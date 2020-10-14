@@ -69,10 +69,10 @@ optiga_crypt_t * get_optiga_crypt(void);
 };
 
 optiga_crypt_t * me = NULL;
-optiga_lib_status_t crypt_event_completed_status;
+optiga_lib_status_t crypt_event_completed_status_paltest;
 static void optiga_crypt_event_completed(void * context, optiga_lib_status_t return_status)
 {
-    crypt_event_completed_status = return_status;
+    crypt_event_completed_status_paltest = return_status;
 }
 mbedtls_platform_context pctx;
 
@@ -655,7 +655,7 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
     }
 
     // Reset the status variable (updated via callback, when requested operation is finished, or timeout)
-    crypt_event_completed_status = OPTIGA_LIB_BUSY;
+    crypt_event_completed_status_paltest = OPTIGA_LIB_BUSY;
     crypt_sync_status = optiga_crypt_ecc_generate_keypair(me,
                                                           OPTIGA_ECC_CURVE_NIST_P_256,
                                                           (optiga_key_usage_t)( OPTIGA_KEY_USAGE_KEY_AGREEMENT | OPTIGA_KEY_USAGE_AUTHENTICATION ),
@@ -668,11 +668,11 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
         NL_TEST_ASSERT(inSuite, 0);
     }
     // Wait loop - Need to Wait until the optiga_crypt_ecdsa_verify is completed
-    while (OPTIGA_LIB_BUSY == crypt_event_completed_status) {
+    while (OPTIGA_LIB_BUSY == crypt_event_completed_status_paltest) {
         //pal_os_timer_delay_in_milliseconds(10);
         usleep(5*1000);
     }
-    if(crypt_event_completed_status!= OPTIGA_LIB_SUCCESS) {
+    if(crypt_event_completed_status_paltest!= OPTIGA_LIB_SUCCESS) {
         cleanup();
         NL_TEST_ASSERT(inSuite, 0);
     }

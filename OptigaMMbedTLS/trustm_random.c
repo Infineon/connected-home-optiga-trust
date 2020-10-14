@@ -44,12 +44,12 @@
 #include "optiga/optiga_util.h"
 #include "optiga/common/optiga_lib_common.h"
 
-optiga_lib_status_t crypt_event_completed_status;
+optiga_lib_status_t crypt_event_completed_status_random;
 
 //lint --e{818} suppress "argument "context" is not used in the sample provided"
 static void optiga_crypt_event_completed(void * context, optiga_lib_status_t return_status)
 {
-    crypt_event_completed_status = return_status;
+    crypt_event_completed_status_random = return_status;
     if (NULL != context)
     {
         // callback to upper layer here
@@ -73,7 +73,7 @@ int mbedtls_hardware_poll( void *data,
         }
         else
         {
-        	crypt_event_completed_status = OPTIGA_LIB_BUSY;
+        	crypt_event_completed_status_random = OPTIGA_LIB_BUSY;
 			command_queue_status = optiga_crypt_random(me, OPTIGA_RNG_TYPE_TRNG, output, len);
 			if( command_queue_status != OPTIGA_LIB_SUCCESS)
 			{
@@ -83,12 +83,12 @@ int mbedtls_hardware_poll( void *data,
 
 			if (!error)
 			{
-				while (OPTIGA_LIB_BUSY == crypt_event_completed_status)
+				while (OPTIGA_LIB_BUSY == crypt_event_completed_status_random)
 				{
 					pal_os_timer_delay_in_milliseconds(5);
 				}
 
-				if(crypt_event_completed_status!= OPTIGA_LIB_SUCCESS)
+				if(crypt_event_completed_status_random!= OPTIGA_LIB_SUCCESS)
 				{
 					// MBEDTLS_ERR_PK_FEATURE_UNAVAILABLE
 					error = -0x0034;

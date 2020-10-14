@@ -38,24 +38,25 @@
 
 #define PRINT_ECDH_PUBLICKEY   0
 
-// We use here Session Context ID 0xE103 (you can choose between 0xE100 - E104)
-//#define OPTIGA_TRUSTM_KEYID_TO_STORE_PRIVATE_KEY  0xE103
 
 
 /**
  * Callback when optiga_crypt_xxxx operation is completed asynchronously
  */
-optiga_lib_status_t crypt_event_completed_status;
+optiga_lib_status_t crypt_event_completed_status_ecdh;
 
 //lint --e{818} suppress "argument "context" is not used in the sample provided"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-function"
 static void optiga_crypt_event_completed(void * context, optiga_lib_status_t return_status)
 {
-	crypt_event_completed_status = return_status;
+	crypt_event_completed_status_ecdh = return_status;
     if (NULL != context)
     {
         // callback to upper layer here
     }
 }
+#pragma GCC diagnostic pop
 
 #ifdef MBEDTLS_ECDH_GEN_PUBLIC_ALT
 /*
@@ -90,7 +91,7 @@ int mbedtls_ecdh_gen_public(mbedtls_ecp_group *grp, mbedtls_mpi *d,
 		goto cleanup;
 	}
 
-	crypt_event_completed_status = OPTIGA_LIB_BUSY;
+	crypt_event_completed_status_ecdh = OPTIGA_LIB_BUSY;
 
 	//invoke optiga command to generate a key pair.
 	crypt_sync_status = optiga_crypt_ecc_generate_keypair(me, curve_id,
@@ -103,12 +104,12 @@ int mbedtls_ecdh_gen_public(mbedtls_ecp_group *grp, mbedtls_mpi *d,
 		goto cleanup;
 	}
 
-	while (OPTIGA_LIB_BUSY == crypt_event_completed_status)
+	while (OPTIGA_LIB_BUSY == crypt_event_completed_status_ecdh)
 	{
 		pal_os_timer_delay_in_milliseconds(10);
 	}
 
-	if (crypt_event_completed_status != OPTIGA_LIB_SUCCESS)
+	if (crypt_event_completed_status_ecdh != OPTIGA_LIB_SUCCESS)
 	{
 		return_status = MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
 		goto cleanup;
@@ -231,7 +232,7 @@ int mbedtls_ecdh_compute_shared(mbedtls_ecp_group *grp, mbedtls_mpi *z,
 		goto cleanup;
 	}
 
-	crypt_event_completed_status = OPTIGA_LIB_BUSY;
+	crypt_event_completed_status_ecdh = OPTIGA_LIB_BUSY;
 	//Invoke OPTIGA command to generate shared secret and store in the OID/buffer.
 	crypt_sync_status = optiga_crypt_ecdh(me, optiga_oid, &pk, 1, buf);
 
@@ -242,12 +243,12 @@ int mbedtls_ecdh_compute_shared(mbedtls_ecp_group *grp, mbedtls_mpi *z,
 	}
 
 	 //Wait until the optiga_crypt_ecdh operation is completed
-	while (OPTIGA_LIB_BUSY == crypt_event_completed_status)
+	while (OPTIGA_LIB_BUSY == crypt_event_completed_status_ecdh)
 	{
 		pal_os_timer_delay_in_milliseconds(10);
 	}
 
-	if (crypt_event_completed_status != OPTIGA_LIB_SUCCESS)
+	if (crypt_event_completed_status_ecdh != OPTIGA_LIB_SUCCESS)
 	{
 		return_status = MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
 		goto cleanup;
