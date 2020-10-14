@@ -44,7 +44,7 @@ root@raspberrypi:/home/pi/connectedhomeip# out/pi/tests/CHIPCryptoPALTest
 
 If all tests show "PASSED" the SW crypto has passed tests. Now insert the OPTIGA-M HW crypto.
 
-## 6 - Insert the IFX OPTIGA-M Directory structurecd ~
+## 6 - Insert the IFX OPTIGA-M Directory structure
 ```console
 root@raspberrypi:/home/pi/connectedhomeip# cd third_party/mbedtls/
 root@raspberrypi:/home/pi/connectedhomeip/third_party/mbedtls# git clone https://github.com/Infineon/optiga-trust-m
@@ -98,9 +98,7 @@ Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedT
 
 
 
-===================================================================================================================================================================================
 IMPLEMENTATION DETAILS
-===================================================================================================================================================================================
 
 The two files that really matter:
 
