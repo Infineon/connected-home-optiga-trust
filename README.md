@@ -70,8 +70,8 @@ OptigaMMbedTLS/trustm_random.c ->/connectedhomeip/third_party/mbedtls/optiga-tru
 OptigaMMbedTLS/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using MBedTLS API
 
 ## 8 - Modify optiga_lib_config.h
- #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
- //#define OPTIGA_COMMS_SHIELDED_CONNECTION  Disable shielded connection
+#define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
+//#define OPTIGA_COMMS_SHIELDED_CONNECTION  Disable shielded connection
 
 ## 9  - Edit CHIPCryptoPAL.h to make the members of class P256Keypair public:
 public:
@@ -92,11 +92,7 @@ root@raspberrypi:/home/pi/connectedhomeip# ninja -C out/pi
 root@raspberrypi:/home/pi/connectedhomeip# out/pi/tests/CHIPCryptoPALTest
 ```
 
-
-
 Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedTLS.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output
-
-
 
 IMPLEMENTATION DETAILS
 
