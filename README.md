@@ -19,7 +19,7 @@ These instructions are based on the build instructions at https://github.com/pro
 
 Firstly assemble the OPTIGA M Board on the Raspberry Pi and use the executable in the HWTest directory to check that the OPTIGA M is talking to the Raspberry Pi.
 
-The Raspberry PI should be running Raspian Buster and shoudl be online.
+The Raspberry PI should be running Raspian Buster and must be online.
 
 
 Then, to build the code:
@@ -78,8 +78,6 @@ src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto - gn  file to build cry
 
 src/crypto/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver tests
 
-(In future OPTIGA M Files direcly from IFX repo, no need to overwrite ??)
-[PW] Will this statment be deleted?
 optigam_mbedtls/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDH implementation using OptigaM
 
 optigam_mbedtls/trustm_ecdsa.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDSA implementation using OptigaM
