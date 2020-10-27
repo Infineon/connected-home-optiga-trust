@@ -12,6 +12,7 @@ https://github.com/project-chip/connectedhomeip
 These instructions are based on the build instructions at https://github.com/project-chip/connectedhomeip/blob/master/docs/BUILDING.md
 
 Firstly assemble the OPTIGA M Board on the Raspberry Pi and use the executable in the HWTest directory to check that the OPTIGA M is talking to the Raspberry Pi.
+[PW] Add statment to prepare raspi image (32bit Raspi os?)
 
 Then, to build the code:
 
