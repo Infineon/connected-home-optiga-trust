@@ -1,9 +1,15 @@
 # Building and testing the OPTIGA™ Trust M for the Connected Home IP Software
 
 
-This delivery provides a set of files to allow the Infineon OPTIGA M device to perfom CHIP crypto operations. The OPTIGA M device will act as a HW accellerator to the MbedTLS library.
+This delivery provides a set of files to allow the Infineon OPTIGA M device to perfom CHIP crypto operations. The OPTIGA M device will act as a HW accelerator to the mbedtls library.
 
-As an example, this document will detail how to insert the files in the GN/Ninja environment. This was tested on commit xxx
+To download the Infineon files enter:
+
+```console
+root@raspberrypi:git clone https://github.com/Infineon/connected-home-optiga-trust
+```
+
+This document will detail how to insert the files in the GN/Ninja environment. This was tested on commit xxx
 
 The CHIP codebase is at:
  
@@ -12,15 +18,17 @@ https://github.com/project-chip/connectedhomeip
 These instructions are based on the build instructions at https://github.com/project-chip/connectedhomeip/blob/master/docs/BUILDING.md
 
 Firstly assemble the OPTIGA M Board on the Raspberry Pi and use the executable in the HWTest directory to check that the OPTIGA M is talking to the Raspberry Pi.
-[PW] Add statement to prepare raspi image (32bit Raspi os?)
+
+The Raspberry PI should be running Raspian Buster and shoudl be online.
+
 
 Then, to build the code:
-[PW] I have to clone this repo to raspi right? Pls add this step
+
 ## 1 -  Login as root, then run script to setup tools
 ```console
 root@raspberrypi:./prep_rpi.bash
 ```
-[PW] Raspi needs to be online right?
+
 ## 2 - Checkout the CHIP repo
 ```console
 root@raspberrypi:git clone https://github.com/project-chip/connectedhomeip
@@ -56,15 +64,15 @@ root@raspberrypi:/home/pi/connectedhomeip/third_party/mbedtls# git clone https:/
 
 Note that the CHIP codebase is continually changing. Any updates to these files since commit xxx will have to be merged into these files.
 
-MBedTLS/config.h -> /connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
+mbedtls/config.h -> /connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
 
-MBedTLS/BUILD.gn -> /connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
+mbedtls/BUILD.gn -> /connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
 
-MBedTLS/platform_alt.h -> /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
+mbedtls/platform_alt.h -> /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
 
 src/crypto/BUILD.gn -> /connectedhomeip/src/crypto - automake file to build crypto driver
 
-src/crypto/CHIPCryptoPALmbedTLS.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver
+src/crypto/CHIPCryptoPALmbedtls.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver
 
 src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto - gn  file to build crypto driver tests
 
@@ -72,13 +80,13 @@ src/crypto/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypt
 
 (In future OPTIGA M Files direcly from IFX repo, no need to overwrite ??)
 [PW] Will this statment be deleted?
-OptigaMMbedTLS/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDH implementation using OptigaM
+optigam_mbedtls/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDH implementation using OptigaM
 
-OptigaMMbedTLS/trustm_ecdsa.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDSA implementation using OptigaM
+optigam_mbedtls/trustm_ecdsa.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDSA implementation using OptigaM
 
-OptigaMMbedTLS/trustm_random.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed MBedTLS RNG implementation using OptigaM
+optigam_mbedtls/trustm_random.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed mbedtls RNG implementation using OptigaM
 
-OptigaMMbedTLS/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using MBedTLS API
+optigam_mbedtls/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using mbedtls API
 
 ## 8 - Modify optiga_lib_config.h
 #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
@@ -108,13 +116,13 @@ root@raspberrypi:/home/pi/connectedhomeip# ninja -C out/pi
 root@raspberrypi:/home/pi/connectedhomeip# out/pi/tests/CHIPCryptoPALTest
 ```
 
-Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedTLS.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output
+Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedtls.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output
 
 IMPLEMENTATION DETAILS
 
 The two files that really matter:
 
-- connectedhomeip/src/crypto/CHIPCryptoPALmbedTLS.cpp - The main file of interest. This implements CHIP crypto by making calls to an mbedTLS library underneath. The file has been modified to allow the calls to asymmetric crypto. to be implemented by the OptigaM implementation of mbedTLS.
+- connectedhomeip/src/crypto/CHIPCryptoPALmbedtls.cpp - The main file of interest. This implements CHIP crypto by making calls to an mbedtls library underneath. The file has been modified to allow the calls to asymmetric crypto. to be implemented by the OptigaM implementation of mbedtls.
 
 - connectedhomeip/src/crypto/tests/ChipCryptoPALTest.cpp - This file implements the crypto tests. Some tests have been modified to allow for OptigaM impelmentation. In
 particular we cannot import private key test vectors, so the tests must create the keypair on the Optiga and then export the public key from the Optiga to the test harness. As this SW is still work in progress we have made the key data public in the SW structures, as a way of getting things working in the short term with minimum complexity. In the longer term - once the SW is stable - we can modify the code to encapsulate as much key data as feasible.
