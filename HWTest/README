@@ -2,9 +2,14 @@ This directory contains an executable named 'trustx_chipinfo' to test that the O
 
 The executable was built on a Raspberry PI 4 running Version 10 (Buster) with kernel 5.4.51-v7l+ 
 
-When trustx_chipinfo  is run the output should be similar to the following:
+From the connected-home-optiga-trust directory enter the following command:
 
-./trustx_chipinfo
+"sudo HWTest/trustx_chipinfo"
+
+(You may need to modify the HWTest/trustx_chipinfo file permissions to enable execution. Also note that this executable is calling bin/libtrust.so)
+
+If the HW is properly connected you will see something similar to:
+
 Read Chip Info [0xE0C2]: Success.
 ===========================================
 CIM Identifier             [bCimIdentifer]: 0xcd
