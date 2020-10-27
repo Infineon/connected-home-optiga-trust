@@ -12,15 +12,15 @@ https://github.com/project-chip/connectedhomeip
 These instructions are based on the build instructions at https://github.com/project-chip/connectedhomeip/blob/master/docs/BUILDING.md
 
 Firstly assemble the OPTIGA M Board on the Raspberry Pi and use the executable in the HWTest directory to check that the OPTIGA M is talking to the Raspberry Pi.
-[PW] Add statment to prepare raspi image (32bit Raspi os?)
+[PW] Add statement to prepare raspi image (32bit Raspi os?)
 
 Then, to build the code:
-
+[PW] I have to clone this repo to raspi right? Pls add this step
 ## 1 -  Login as root, then run script to setup tools
 ```console
 root@raspberrypi:./prep_rpi.bash
 ```
-
+[PW] Raspi needs to be online right?
 ## 2 - Checkout the CHIP repo
 ```console
 root@raspberrypi:git clone https://github.com/project-chip/connectedhomeip
@@ -70,6 +70,7 @@ src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto - gn  file to build cry
 src/crypto/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver tests
 
 (In future OPTIGA M Files direcly from IFX repo, no need to overwrite ??)
+[PW] Will this statment be deleted?
 OptigaMMbedTLS/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDH implementation using OptigaM
 
 OptigaMMbedTLS/trustm_ecdsa.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified MBedTLS ECDSA implementation using OptigaM
