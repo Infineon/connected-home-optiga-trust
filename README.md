@@ -41,7 +41,7 @@ root@raspberrypi:git submodule update --init
 
 ## 3 - Install missing packages
 ```console
-root@raspberrypi:/home/pi/connectedhomeip#:apt-get install libdbus-glib-1-2 libdbus-glib-1-dev
+root@raspberrypi:/home/pi/connectedhomeip#:apt-get install libdbus-glib-1-2 libdbus-glib-1-dev libavahi-client-dev 
 ```
 
 ## 4 - Build with mbedtls
