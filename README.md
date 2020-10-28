@@ -26,6 +26,7 @@ Then, to build the code:
 
 ## 1 -  Login as root, then run script to setup tools
 ```console
+root@raspberrypi:apt-get update
 root@raspberrypi:./prep_rpi.bash
 ```
 
