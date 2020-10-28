@@ -49,7 +49,7 @@ https://github.com/nestlabs/nlassert
 
 ## 4 - Build with mbedtls
 ```console
-root@raspberrypi:/home/pi/connectedhomeip#:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false'
+root@raspberrypi:/home/pi/connectedhomeip#:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false treat_warnings_as_errors = false'
 root@raspberrypi:/home/pi/connectedhomeip# ninja -C out/pi
 ```
 
