@@ -44,6 +44,9 @@ root@raspberrypi:git submodule update --init
 root@raspberrypi:/home/pi/connectedhomeip#:apt-get install libdbus-glib-1-2 libdbus-glib-1-dev libavahi-client-dev 
 ```
 
+## 3.1 - Install nlassert from here
+https://github.com/nestlabs/nlassert
+
 ## 4 - Build with mbedtls
 ```console
 root@raspberrypi:/home/pi/connectedhomeip#:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false'
