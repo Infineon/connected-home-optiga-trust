@@ -31,6 +31,7 @@ root@raspberrypi:./prep_rpi.bash
 
 ## 2 - Checkout the CHIP repo
 ```console
+root@raspberrypi:cd $HOME
 root@raspberrypi:git clone https://github.com/project-chip/connectedhomeip
 root@raspberrypi:cd connectedhomeip
 root@raspberrypi:git submodule update --init
