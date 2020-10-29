@@ -65,7 +65,7 @@ pi@raspberrypi:~/connectedhomeip$ cd third_party/mbedtls/
 pi@raspberrypi:/home/pi/connectedhomeip/third_party/mbedtls# git clone https://github.com/Infineon/optiga-trust-m
 ```
 
-## 7 - Replace the orignal CHIP codebase files with the files included in the Infineon file set
+## 7 - Replace the orignal CHIP codebase files with the files form this repository
 
 
 
