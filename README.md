@@ -57,7 +57,9 @@ pi@raspberrypi:~/connectedhomeip$ ninja -C out/pi
 pi@raspberrypi:~/connectedhomeip$ out/pi/tests/CHIPCryptoPALTest
 ```
 
-If all tests show "PASSED" the SW crypto has passed tests. Now insert the OPTIGA-M HW crypto.
+If all tests show "PASSED" the SW crypto has passed tests. A sample output is provided in *SWTestPassOutput.txt*
+
+The next section shows how to insert the OPTIGA-M drivers and tests into the CHIP codebase.
 
 ## 6 - Insert the IFX OPTIGA-M Directory structure
 ```console
@@ -125,7 +127,7 @@ pi@raspberrypi:~/connectedhomeip$ ninja -C out/pi
 pi@raspberrypi:~/connectedhomeip$ out/pi/tests/CHIPCryptoPALTest
 ```
 
-Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedtls.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output
+Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedtls.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output. A sample output is provided in *HWTestPassOutput.txt*
 
 IMPLEMENTATION DETAILS
 
