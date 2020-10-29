@@ -2,59 +2,57 @@
 
 This delivery provides a set of files to allow the Infineon OPTIGA M device to perfom CHIP crypto operations. The OPTIGA M device will act as a HW accelerator to the mbedtls library.
 
-The user should start with a Raspberry PI running Raspian Buster and must be online.
+The user should start with a Raspberry PI running Ubuntu 20.04LTS 64Bit and must be online.
 
 Firstly download the Infineon files by entering:
 
 ```console
-pi@raspberrypi:git clone https://github.com/Infineon/connected-home-optiga-trust
+ubuntu@ubuntu:git clone https://github.com/Infineon/connected-home-optiga-trust
 ```
 
 Then assemble the OPTIGA M Board on the Raspberry Pi and enable GPIO in the raspberry configuration and use the executable in the HWTest directory to check that the OPTIGA M is talking to the Raspberry Pi by entering
 ```console
-pi@raspberrypi:~ $ cd connected-home-optiga-trust/
-pi@raspberrypi:~/connected-home-optiga-trust $ chmod 777 hwtest/trustx_chipinfo 
-pi@raspberrypi:~/connected-home-optiga-trust $ sudo hwtest/trustx_chipinfo 
+ubuntu@ubuntu:~ $ cd connected-home-optiga-trust/
+ubuntu@ubuntu:~/connected-home-optiga-trust $ chmod 777 hwtest/trustm_chipinfo 
+ubuntu@ubuntu:~/connected-home-optiga-trust $ sudo hwtest/trustm_chipinfo 
 ```
 This should produce a list of chip parameters which proves that the OPTIGA-M is talking via GPIO to the Raspberry PI
 
-Then, to build the code:
+Then, to build the CHIP code (Based on instructions at https://github.com/project-chip/connectedhomeip/blob/master/docs/BUILDING.md )
 
-## 1 -  Login as root , then run script to setup tools
-```console
-root@raspberrypi:apt-get update
-root@raspberrypi:chmod +x ./prep_rpi.bash
-root@raspberrypi:sudo bash ./prep_rpi.bash
-```
 
-## 2 - Clone the CHIP repo
+## 1 - Clone the CHIP repo
 
 Use commit bd7042eb5ab2a071dcbc726edc896a788269eeea , Wed Oct 28 15:37:51 2020 -0400
 
 ```console 
 root@raspberrypi:su pi
-pi@raspberrypi:cd ~
-pi@raspberrypi:git clone https://github.com/project-chip/connectedhomeip
-pi@raspberrypi:cd connectedhomeip
-pi@raspberrypi:git submodule update --init
-pi@raspberrypi:git checkout bd7042eb5ab2a071dcbc726edc896a788269eeea
+ubuntu@ubuntu:cd ~
+ubuntu@ubuntu:git clone https://github.com/project-chip/connectedhomeip
+ubuntu@ubuntu:cd connectedhomeip
+ubuntu@ubuntu:git submodule update --init
+ubuntu@ubuntu:git checkout bd7042eb5ab2a071dcbc726edc896a788269eeea
 ```
 
-## 3 - Install missing packages
+## 2 - Install missing packages
 ```console
-pi@raspberrypi:~/connectedhomeip$:sudo apt-get install libdbus-glib-1-2 libdbus-glib-1-dev libavahi-client-dev 
+ubuntu@ubuntu:~/connectedhomeip$:sudo apt-get install git gcc g++ python pkg-config libssl-dev libdbus-1-dev libglib2.0-dev libavahi-client-dev ninja-build python3-venv python3-dev unzip
 ```
 
+## 3 - Build Preparation
+```console
+ubuntu@ubuntu:~/connectedhomeip$:source scripts/activate.sh
+```
 
 ## 4 - Build with mbedtls
 ```console
-pi@raspberrypi:~/connectedhomeip$:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false treat_warnings_as_errors = false'
-pi@raspberrypi:~/connectedhomeip$ ninja -C out/pi
+ubuntu@ubuntu:~/connectedhomeip$:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false treat_warnings_as_errors = false'
+ubuntu@ubuntu:~/connectedhomeip$ ninja -C out/pi
 ```
 
 ## 5 - Run the crypo test executable
 ```console
-pi@raspberrypi:~/connectedhomeip$ out/pi/tests/CHIPCryptoPALTest
+ubuntu@ubuntu:~/connectedhomeip$ out/pi/tests/CHIPCryptoPALTest
 ```
 
 If all tests show "PASSED" the SW crypto has passed tests. A sample output is provided in *SWTestPassOutput.txt*
@@ -63,11 +61,11 @@ The next section shows how to insert the OPTIGA-M drivers and tests into the CHI
 
 ## 6 - Insert the IFX OPTIGA-M Directory structure
 ```console
-pi@raspberrypi:~/connectedhomeip$ cd third_party/mbedtls/
-pi@raspberrypi:/home/pi/connectedhomeip/third_party/mbedtls# git clone https://github.com/Infineon/optiga-trust-m
+ubuntu@ubuntu:~/connectedhomeip$ cd third_party/mbedtls/
+ubuntu@ubuntu:/home/pi/connectedhomeip/third_party/mbedtls# git clone https://github.com/Infineon/optiga-trust-m
 ```
 
-## 7 - Replace the orignal CHIP codebase files with the files form this repository
+## 7 - Replace the orignal CHIP codebase files with the files from this repository
 
 
 
@@ -117,14 +115,14 @@ public:
 
 ## 10 - Rebuild with warnings allowed
 ```console
-pi@raspberrypi:~/connectedhomeip$:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false treat_warnings_as_errors = false'
-pi@raspberrypi:~/connectedhomeip$ ninja -C out/pi
+ubuntu@ubuntu:~/connectedhomeip$:gn gen out/pi --args='chip_crypto="mbedtls" chip_enable_python_modules=false treat_warnings_as_errors = false'
+ubuntu@ubuntu:~/connectedhomeip$ ninja -C out/pi
 ```
 
 ## 11 - Run the crypo test executable
 (Make sure that RaspPi I2C is enabled)
 ```console
-pi@raspberrypi:~/connectedhomeip$ out/pi/tests/CHIPCryptoPALTest
+ubuntu@ubuntu:~/connectedhomeip$ out/pi/tests/CHIPCryptoPALTest
 ```
 
 Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedtls.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output. A sample output is provided in *HWTestPassOutput.txt*
