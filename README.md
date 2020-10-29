@@ -14,7 +14,7 @@ Then assemble the OPTIGA M Board on the Raspberry Pi and enable GPIO in the rasp
 ```console
 pi@raspberrypi:~ $ cd connected-home-optiga-trust/
 pi@raspberrypi:~/connected-home-optiga-trust $ chmod 777 hwtest/trustx_chipinfo 
-pi@raspberrypi:~/connected-home-optiga-trust $ sudo hwtest/trustx_chipinfocd 
+pi@raspberrypi:~/connected-home-optiga-trust $ sudo hwtest/trustx_chipinfo 
 ```
 This should produce a list of chip parameters which proves that the OPTIGA-M is talking via GPIO to the Raspberry PI
 
