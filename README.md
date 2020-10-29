@@ -16,22 +16,7 @@ pi@raspberrypi:~ $ cd connected-home-optiga-trust/
 pi@raspberrypi:~/connected-home-optiga-trust $ chmod 777 hwtest/trustx_chipinfo 
 pi@raspberrypi:~/connected-home-optiga-trust $ sudo hwtest/trustx_chipinfocd 
 ```
-This should produce something similar to:
-
-"Read Chip Info [0xE0C2]: Success.
-===========================================
-CIM Identifier             [bCimIdentifer]: 0xcd
-Platform Identifer   [bPlatformIdentifier]: 0x16
-Model Identifer         [bModelIdentifier]: 0x33
-ID of ROM mask                  [wROMCode]: 0x8201
-Chip Type                    [rgbChipType]: 0x00 0x1c 0x00 0x05 0x00 0x00
-Batch Number              [rgbBatchNumber]: 0x0a 0x09 0x1b 0x5c 0x00 0x07
-X-coordinate              [wChipPositionX]: 0x004a
-Y-coordinate              [wChipPositionY]: 0x002c
-Firmware Identifier [dwFirmwareIdentifier]: 0x80101071
-Build Number                 [rgbESWBuild]: 08 09"
-
-Which proves that the OPTIGA-M is talking via GPIO to the Raspberry PI
+This should produce a list of chip parameters which proves that the OPTIGA-M is talking via GPIO to the Raspberry PI
 
 Then, to build the code:
 
