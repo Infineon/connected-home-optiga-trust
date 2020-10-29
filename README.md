@@ -27,7 +27,9 @@ root@raspberrypi:chmod +x ./prep_rpi.bash
 root@raspberrypi:sudo bash ./prep_rpi.bash
 ```
 
-## 2 - Clone the CHIP repo, goto commit bd7042eb5ab2a071dcbc726edc896a788269eeea , Wed Oct 28 15:37:51 2020 -0400
+## 2 - Clone the CHIP repo
+
+Use commit bd7042eb5ab2a071dcbc726edc896a788269eeea , Wed Oct 28 15:37:51 2020 -0400
 
 ```console 
 root@raspberrypi:su pi
@@ -89,13 +91,18 @@ optigam_mbedtls/trustm_random.c ->/connectedhomeip/third_party/mbedtls/optiga-tr
 
 optigam_mbedtls/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using mbedtls API
 
-## 8 - Modify /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include/optiga/optiga_lib_config.h
+## 8 - Modify optiga_lib_config.h
+
+This file is at: /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include/optiga/optiga_lib_config.h
 
 #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
 
 //#define OPTIGA_COMMS_SHIELDED_CONNECTION  Disable shielded connection
 
-## 9  - Edit /connectedhomeip/src/crypto/CHIPCryptoPAL.h to make the members of class P256Keypair public:
+## 9  - Edit CHIPCryptoPAL.h to make the members of class P256Keypair public:
+
+Edit /connectedhomeip/src/crypto/CHIPCryptoPAL.h as follows:
+
 public:
 
     P256PublicKey mPublicKey;
