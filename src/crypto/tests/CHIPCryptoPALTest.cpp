@@ -682,7 +682,7 @@ static void GenKeyPairOnOptiga(nlTestSuite * inSuite, uint16_t privkey_oid, P256
       IFX_DBG(" %0x", hex_public_key_buffer[i]);
     }
     IFX_DBG("\n");
-    IFX_DBG("IFX_>Expected Public Key length => %d \n", (*keypairIn).mPublicKey.Length());
+    IFX_DBG("IFX_>Expected Public Key length => %ld \n", (*keypairIn).mPublicKey.Length());
     NL_TEST_ASSERT(inSuite, public_key_buffer_length == ((*keypairIn).mPublicKey.Length() +3) );
     
     //Copy public key to Public Key member

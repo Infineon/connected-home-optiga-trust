@@ -338,7 +338,7 @@ CHIP_ERROR DRBG_get_bytes(uint8_t * out_buffer, const size_t out_length)
       cnt += inc;
     }
       
-    IFX_DBG("IFX_>mbedtls_hardware_poll() inlength=>%d outlength=>%d\n", out_length, hw_out_length);
+    IFX_DBG("IFX_>mbedtls_hardware_poll() inlength=>%ld outlength=>%ld\n", out_length, hw_out_length);
     //Normally comment the following line out as it produces a lot of data
     for(unsigned int i=0; i<(unsigned int) hw_out_length; i++) {
       IFX_DBG(" %0x", out_buffer[i]);
@@ -387,7 +387,7 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
     int result       = 0;
     uint8_t hash[NUM_BYTES_IN_SHA256_HASH];
     //size_t siglen = out_signature.Capacity();
-    unsigned char r_len, s_len;
+    size_t r_len, s_len;
 
     mbedtls_mpi r;
 	  mbedtls_mpi s;
@@ -425,17 +425,17 @@ CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_len
     r_len = mbedtls_mpi_size(&r);
     s_len = mbedtls_mpi_size(&s);
 
-    IFX_DBG("IFX_> r,s lengths=>%0x , %0x ...\n", r_len, s_len);
+    IFX_DBG("IFX_> r,s lengths=>%0lx , %0lx ...\n", r_len, s_len);
     out_signature[0] = 0x30;
-    out_signature[1] = s_len+r_len+4;
+    out_signature[1] = (uint8_t) (s_len+r_len+4);
     out_signature[2] = 0x02;
-    out_signature[3] = r_len;
+    out_signature[3] = (uint8_t) r_len;
     
     result = mbedtls_mpi_write_binary(&r, out_signature+4 , r_len);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
  
     out_signature[4+r_len]= 0x02;
-    out_signature[5+r_len] = s_len;
+    out_signature[5+r_len] = (uint8_t) s_len;
   
     result = mbedtls_mpi_write_binary(&s, out_signature+6+r_len , s_len);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL); 
