@@ -2,7 +2,7 @@
 
 This delivery provides a set of files to allow the Infineon OPTIGA M device to perfom CHIP crypto operations. The OPTIGA M device will act as a HW accelerator to the mbedtls library.
 
-The user should start with a Raspberry PI running Ubuntu 20.04LTS 64Bit and must be online.
+The user should start with a Raspberry PI running Ubuntu 20.04LTS 64Bit and must be online (note that currently only the server version is available).
 
 Firstly download the Infineon files by entering:
 
