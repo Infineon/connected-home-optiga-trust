@@ -61,7 +61,7 @@ The next section shows how to insert the OPTIGA-M drivers and tests into the CHI
 ## 6 - Insert the IFX OPTIGA-M Directory structure
 ```console
 ubuntu@ubuntu:~$~/connectedhomeip$ cd third_party/mbedtls/
-ubuntu@ubuntu:~$/home/pi/connectedhomeip/third_party/mbedtls# git clone https://github.com/Infineon/optiga-trust-m
+ubuntu@ubuntu:~$/home/pi/connectedhomeip/third_party/mbedtls# git clone --branch master https://github.com/Infineon/optiga-trust-m
 ```
 
 ## 7 - Replace the orignal CHIP codebase files with the files from this repository
