@@ -66,28 +66,57 @@ ubuntu@ubuntu:~$/home/pi/connectedhomeip/third_party/mbedtls# git clone --branch
 
 ## 7 - Replace the orignal CHIP codebase files with the files from this repository
 config file to enable HW accellerator
-{Code}
-$HOME/connected-home-optiga-trust/mbedtls/config.h -> $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls
-{Code}
-$HOME/connected-home-optiga-trust/mbedtls/BUILD.gn -> $HOME/connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
+```console
+cp $HOME/connected-home-optiga-trust/mbedtls/config.h $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls
+```
 
-$HOME/connected-home-optiga-trust/mbedtls/platform_alt.h -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
+gn file to build OPTIGA M SW
+```console
+cp $HOME/connected-home-optiga-trust/mbedtls/BUILD.gn $HOME/connectedhomeip/third_party/mbedtls
+```
 
-$HOME/connected-home-optiga-trust/src/crypto/BUILD.gn -> $HOME/connectedhomeip/src/crypto - automake file to build crypto driver
+init function declarations
+```console
+cp $HOME/connected-home-optiga-trust/mbedtls/platform_alt.h $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include
+```
+automake file to build crypto driver
+```console
+cp $HOME/connected-home-optiga-trust/src/crypto/BUILD.gn $HOME/connectedhomeip/src/crypto
+```
 
-$HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedtls.cpp -> $HOME/connectedhomeip/src/crypto - OPTIGA M crypto driver
+OPTIGA M crypto driver
+```console
+cp $HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedtls.cpp $HOME/connectedhomeip/src/crypto
+```
 
-$HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn -> $HOME/connectedhomeip/src/crypto/tests - gn  file to build crypto driver tests
+gn  file to build crypto driver tests
+```console
+cp $HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn $HOME/connectedhomeip/src/crypto/tests
+```
 
-$HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests - OPTIGA M crypto driver tests
+OPTIGA M crypto driver tests
+```console
+$HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests
+```
 
-$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdh.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDH implementation using OptigaM
+modified mbedtls ECDH implementation using OptigaM
+```console
+cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdh.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+```
+modified mbedtls ECDSA implementation using OptigaM
+```console
+cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdsa.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+```
 
-$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdsa.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDSA implementation using OptigaM
+fixed mbedtls RNG implementation using OptigaM
+```console
+cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_random.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+```
 
-$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_random.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed mbedtls RNG implementation using OptigaM
-
-$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_init.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using mbedtls API
+new OPTIGA M Init routine using mbedtls API
+```console
+cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_init.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+```
 
 ## 8 - Modify optiga_lib_config.h
 
