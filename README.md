@@ -65,9 +65,10 @@ ubuntu@ubuntu:~$/home/pi/connectedhomeip/third_party/mbedtls# git clone --branch
 ```
 
 ## 7 - Replace the orignal CHIP codebase files with the files from this repository
-
-$HOME/connected-home-optiga-trust/mbedtls/config.h -> $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
-
+config file to enable HW accellerator
+{Code}
+$HOME/connected-home-optiga-trust/mbedtls/config.h -> $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls
+{Code}
 $HOME/connected-home-optiga-trust/mbedtls/BUILD.gn -> $HOME/connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
 
 $HOME/connected-home-optiga-trust/mbedtls/platform_alt.h -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
