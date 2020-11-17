@@ -76,9 +76,9 @@ src/crypto/BUILD.gn -> /connectedhomeip/src/crypto - automake file to build cryp
 
 src/crypto/CHIPCryptoPALmbedtls.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver
 
-src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto - gn  file to build crypto driver tests
+src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto/tests - gn  file to build crypto driver tests
 
-src/crypto/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver tests
+src/crypto/tests/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto/tests - OPTIGA M crypto driver tests
 
 optigam_mbedtls/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDH implementation using OptigaM
 
