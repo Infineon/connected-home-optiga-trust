@@ -96,7 +96,7 @@ cp $HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn $HOME/connectedho
 
 OPTIGA M crypto driver tests
 ```console
-$HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests
+cp $HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests
 ```
 
 modified mbedtls ECDH implementation using OptigaM
