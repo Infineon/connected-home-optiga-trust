@@ -66,31 +66,31 @@ ubuntu@ubuntu:~$/home/pi/connectedhomeip/third_party/mbedtls# git clone --branch
 
 ## 7 - Replace the orignal CHIP codebase files with the files from this repository
 
-mbedtls/config.h -> /connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
+$HOME/connected-home-optiga-trust/mbedtls/config.h -> $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls - config file to enable HW accellerator
 
-mbedtls/BUILD.gn -> /connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
+$HOME/connected-home-optiga-trust/mbedtls/BUILD.gn -> $HOME/connectedhomeip/third_party/mbedtls - gn file to build OPTIGA M SW
 
-mbedtls/platform_alt.h -> /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
+$HOME/connected-home-optiga-trust/mbedtls/platform_alt.h -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include - init function declarations
 
-src/crypto/BUILD.gn -> /connectedhomeip/src/crypto - automake file to build crypto driver
+$HOME/connected-home-optiga-trust/src/crypto/BUILD.gn -> $HOME/connectedhomeip/src/crypto - automake file to build crypto driver
 
-src/crypto/CHIPCryptoPALmbedtls.cpp -> /connectedhomeip/src/crypto - OPTIGA M crypto driver
+$HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedtls.cpp -> $HOME/connectedhomeip/src/crypto - OPTIGA M crypto driver
 
-src/crypto/tests/BUILD.gn -> /connectedhomeip/src/crypto/tests - gn  file to build crypto driver tests
+$HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn -> $HOME/connectedhomeip/src/crypto/tests - gn  file to build crypto driver tests
 
-src/crypto/tests/CHIPCryptoPALTest.cpp -> /connectedhomeip/src/crypto/tests - OPTIGA M crypto driver tests
+$HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests - OPTIGA M crypto driver tests
 
-optigam_mbedtls/trustm_ecdh.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDH implementation using OptigaM
+$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdh.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDH implementation using OptigaM
 
-optigam_mbedtls/trustm_ecdsa.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDSA implementation using OptigaM
+$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdsa.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - modified mbedtls ECDSA implementation using OptigaM
 
-optigam_mbedtls/trustm_random.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed mbedtls RNG implementation using OptigaM
+$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_random.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - fixed mbedtls RNG implementation using OptigaM
 
-optigam_mbedtls/trustm_init.c ->/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using mbedtls API
+$HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_init.c -> $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port - new OPTIGA M Init routine using mbedtls API
 
 ## 8 - Modify optiga_lib_config.h
 
-This file is at: /connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include/optiga/optiga_lib_config.h
+This file is at: $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include/optiga/optiga_lib_config.h
 
 #define OPTIGA_COMMS_DEFAULT_RESET_TYPE     (1)
 
