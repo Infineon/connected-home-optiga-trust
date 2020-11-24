@@ -67,36 +67,36 @@ ubuntu@ubuntu:~$/home/pi/connectedhomeip/third_party/mbedtls# git clone --branch
 ## 7 - Replace the orignal CHIP codebase files with the files from this repository
 config file to enable HW accellerator
 ```console
-cp $HOME/connected-home-optiga-trust/mbedtls/config.h $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/mbedtls/config.h $HOME/connectedhomeip/third_party/mbedtls/repo/include/mbedtls
 ```
 
 gn file to build OPTIGA M SW
 ```console
-cp $HOME/connected-home-optiga-trust/mbedtls/BUILD.gn $HOME/connectedhomeip/third_party/mbedtls
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/mbedtls/BUILD.gn $HOME/connectedhomeip/third_party/mbedtls
 ```
 
 init function declarations
 ```console
-cp $HOME/connected-home-optiga-trust/mbedtls/platform_alt.h $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/mbedtls/platform_alt.h $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/optiga/include
 ```
 automake file to build crypto driver
 ```console
-cp $HOME/connected-home-optiga-trust/src/crypto/BUILD.gn $HOME/connectedhomeip/src/crypto
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/BUILD.gn $HOME/connectedhomeip/src/crypto
 ```
 
 OPTIGA M crypto driver
 ```console
-cp $HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedtls.cpp $HOME/connectedhomeip/src/crypto
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedtls.cpp $HOME/connectedhomeip/src/crypto
 ```
 
 gn  file to build crypto driver tests
 ```console
-cp $HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn $HOME/connectedhomeip/src/crypto/tests
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn $HOME/connectedhomeip/src/crypto/tests
 ```
 
 OPTIGA M crypto driver tests
 ```console
-cp $HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests
 ```
 
 modified mbedtls ECDH implementation using OptigaM
@@ -105,17 +105,17 @@ cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdh.c $HOME/connect
 ```
 modified mbedtls ECDSA implementation using OptigaM
 ```console
-cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdsa.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdsa.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
 ```
 
 fixed mbedtls RNG implementation using OptigaM
 ```console
-cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_random.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_random.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
 ```
 
 new OPTIGA M Init routine using mbedtls API
 ```console
-cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_init.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_init.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
 ```
 
 ## 8 - Modify optiga_lib_config.h
@@ -160,12 +160,12 @@ The two files that really matter:
 
 - connectedhomeip/src/crypto/CHIPCryptoPALmbedtls.cpp - The main file of interest. This implements CHIP crypto by making calls to an mbedtls library underneath. The file has been modified to allow the calls to asymmetric crypto. to be implemented by the OptigaM implementation of mbedtls.
 
-- connectedhomeip/src/crypto/tests/ChipCryptoPALTest.cpp - This file implements the crypto tests. Some tests have been modified to allow for OptigaM impelmentation. In
-particular we cannot import private key test vectors, so the tests must create the keypair on the Optiga and then export the public key from the Optiga to the test harness. As this SW is still work in progress we have made the key data public in the SW structures, as a way of getting things working in the short term with minimum complexity. In the longer term - once the SW is stable - we can modify the code to encapsulate as much key data as feasible.
+- connectedhomeip/src/crypto/tests/ChipCryptoPALTest.cpp - This file implements the crypto tests. Some tests have been modified to allow for OptigaM implementation. In
+particular the OptigaM cannot import private key test vectors (by design) , so the tests must create the keypair on the OptigaM and then export the public key from the OptigaM to the test harness. As this SW is still work in progress we have made the key data public in the SW structures, as a way of getting things working in the short term with as few changes as possible. In the longer term - once the SW is stable - we will modify this code to encapsulate as much key data as feasible.
 
-However, the keys are generated purely for testing of the crypto functionality. System wide management of the keys is considered out of scope for this work. (My guess is this will be customer specific and should certainly be managed in detail by the customer. Taking our off the shelf solution as a black box would seem a very dangerous thing for an OEM customer to do)
+However, the keys are generated purely for testing of the crypto functionality. System wide management of the keys is considered out of scope for this work at the moment.
 
-Also, there's currently no shielded connection currently in place in order to get up & running as easily as possible.
+Additonally, there's currently no shielded connection currently in place in order to get up & running as easily as possible. Refer to the OptigaM documentation for details of how to implement this. 
 
 
 
