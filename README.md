@@ -101,7 +101,7 @@ ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/cryp
 
 modified mbedtls ECDH implementation using OptigaM
 ```console
-cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdh.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/optigam_mbedtls/trustm_ecdh.c $HOME/connectedhomeip/third_party/mbedtls/optiga-trust-m/examples/mbedtls_port
 ```
 modified mbedtls ECDSA implementation using OptigaM
 ```console
