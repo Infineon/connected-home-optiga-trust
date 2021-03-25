@@ -86,7 +86,7 @@ ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/cryp
 
 OPTIGA M crypto driver
 ```console
-ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedtls.cpp $HOME/connectedhomeip/src/crypto
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedTLS.cpp $HOME/connectedhomeip/src/crypto
 ```
 
 gn  file to build crypto driver tests
@@ -96,7 +96,7 @@ ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/cryp
 
 OPTIGA M crypto driver tests
 ```console
-ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp -> $HOME/connectedhomeip/src/crypto/tests
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/tests/CHIPCryptoPALTest.cpp $HOME/connectedhomeip/src/crypto/tests
 ```
 
 modified mbedtls ECDH implementation using OptigaM

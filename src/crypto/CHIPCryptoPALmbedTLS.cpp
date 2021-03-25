@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020 Project CHIP Authors
+ *    Copyright (c) 2020-2021 Project CHIP Authors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,10 +19,12 @@
  *    @file
  *      mbedTLS based implementation of CHIP crypto primitives
  */
- 
+
 #define IFX_DBG(...) printf(__VA_ARGS__) 
  
 #include "CHIPCryptoPAL.h"
+
+#include <type_traits>
 
 #include <mbedtls/bignum.h>
 #include <mbedtls/ccm.h>
@@ -40,8 +42,9 @@
 #include <mbedtls/entropy_poll.h>
 
 #include <core/CHIPSafeCasts.h>
-#include <support/BufBound.h>
+#include <support/BufferWriter.h>
 #include <support/CodeUtils.h>
+#include <support/SafePointerCast.h>
 #include <support/logging/CHIPLogging.h>
 
 #include <string.h>
@@ -59,6 +62,8 @@ typedef struct
     mbedtls_ctr_drbg_context mDRBGCtxt;
     mbedtls_entropy_context mEntropy;
 } EntropyContext;
+
+static EntropyContext gsEntropyContext;
 
 static void _log_mbedTLS_error(int error_code)
 {
@@ -193,8 +198,7 @@ Hash_SHA256_stream::~Hash_SHA256_stream(void) {}
 
 static inline mbedtls_sha256_context * to_inner_hash_sha256_context(HashSHA256OpaqueContext * context)
 {
-    nlSTATIC_ASSERT_PRINT(sizeof(context->mOpaque) >= sizeof(mbedtls_sha256_context), "Need more memory for SHA256 Context");
-    return reinterpret_cast<mbedtls_sha256_context *>(context->mOpaque);
+    return SafePointerCast<mbedtls_sha256_context *>(context);
 }
 
 CHIP_ERROR Hash_SHA256_stream::Begin(void)
@@ -291,7 +295,8 @@ CHIP_ERROR pbkdf2_sha256(const uint8_t * password, size_t plen, const uint8_t * 
     VerifyOrExit(password != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(plen > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(salt != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
-    VerifyOrExit(slen > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(slen >= kMin_Salt_Length, error = CHIP_ERROR_INVALID_ARGUMENT);
+    VerifyOrExit(slen <= kMax_Salt_Length, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(key_length > 0, error = CHIP_ERROR_INVALID_ARGUMENT);
     VerifyOrExit(output != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
 
@@ -317,6 +322,56 @@ exit:
         mbedtls_md_free(&md_ctxt);
     }
 
+    return error;
+}
+
+static EntropyContext * get_entropy_context()
+{
+    if (!gsEntropyContext.mInitialized)
+    {
+        mbedtls_entropy_init(&gsEntropyContext.mEntropy);
+        mbedtls_ctr_drbg_init(&gsEntropyContext.mDRBGCtxt);
+
+        gsEntropyContext.mInitialized = true;
+    }
+
+    return &gsEntropyContext;
+}
+
+static mbedtls_ctr_drbg_context * get_drbg_context()
+{
+    EntropyContext * context = get_entropy_context();
+
+    mbedtls_ctr_drbg_context * drbgCtxt = &context->mDRBGCtxt;
+
+    if (!context->mDRBGSeeded)
+    {
+        int status = mbedtls_ctr_drbg_seed(drbgCtxt, mbedtls_entropy_func, &context->mEntropy, nullptr, 0);
+        VerifyOrExit(status == 0, _log_mbedTLS_error(status));
+
+        context->mDRBGSeeded = true;
+    }
+
+    return drbgCtxt;
+
+exit:
+    return nullptr;
+}
+
+CHIP_ERROR add_entropy_source(entropy_source fn_source, void * p_source, size_t threshold)
+{
+    CHIP_ERROR error              = CHIP_NO_ERROR;
+    int result                    = 0;
+    EntropyContext * entropy_ctxt = nullptr;
+
+    VerifyOrExit(fn_source != nullptr, error = CHIP_ERROR_INVALID_ARGUMENT);
+
+    entropy_ctxt = get_entropy_context();
+    VerifyOrExit(entropy_ctxt != nullptr, error = CHIP_ERROR_INTERNAL);
+
+    result = mbedtls_entropy_add_source(&entropy_ctxt->mEntropy, fn_source, p_source, threshold, MBEDTLS_ENTROPY_SOURCE_STRONG);
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+exit:
     return error;
 }
 
@@ -352,7 +407,6 @@ CHIP_ERROR DRBG_get_bytes(uint8_t * out_buffer, const size_t out_length)
 exit:
     return error;
 }
-
 static int CryptoRNG(void * ctxt, uint8_t * out_buffer, size_t out_length)
 {
     return (chip::Crypto::DRBG_get_bytes(out_buffer, out_length) == CHIP_NO_ERROR) ? 0 : 1;
@@ -371,14 +425,12 @@ mbedtls_ecp_group_id MapECPGroupId(SupportedECPKeyTypes keyType)
 
 static inline mbedtls_ecp_keypair * to_keypair(P256KeypairContext * context)
 {
-    nlSTATIC_ASSERT_PRINT(sizeof(P256KeypairContext) >= sizeof(mbedtls_ecp_keypair), "Need more memory for mbedtls_ecp_keypair");
-    return reinterpret_cast<mbedtls_ecp_keypair *>(context->mBytes);
+    return SafePointerCast<mbedtls_ecp_keypair *>(context);
 }
 
 static inline const mbedtls_ecp_keypair * to_const_keypair(const P256KeypairContext * context)
 {
-    nlSTATIC_ASSERT_PRINT(sizeof(P256KeypairContext) >= sizeof(mbedtls_ecp_keypair), "Need more memory for mbedtls_ecp_keypair");
-    return reinterpret_cast<const mbedtls_ecp_keypair *>(context->mBytes);
+    return SafePointerCast<const mbedtls_ecp_keypair *>(context);
 }
 
 CHIP_ERROR P256Keypair::ECDSA_sign_msg(const uint8_t * msg, const size_t msg_length, P256ECDSASignature & out_signature)
@@ -485,7 +537,6 @@ exit:
     _log_mbedTLS_error(result);
     return error;
 }
-
 
 CHIP_ERROR P256PublicKey::ECDSA_validate_msg_signature(const uint8_t * msg, const size_t msg_length,
                                                        const P256ECDSASignature & signature) const
@@ -601,8 +652,7 @@ CHIP_ERROR P256Keypair::ECDH_derive_secret(const P256PublicKey & remote_public_k
     mbedtls_ecp_point ecp_pubkey;
     mbedtls_ecp_point_init(&ecp_pubkey);
 
-   const mbedtls_ecp_keypair * keypair = to_const_keypair(&mKeypair);
-
+    const mbedtls_ecp_keypair * keypair = to_const_keypair(&mKeypair);
 
     VerifyOrExit(mInitialized, error = CHIP_ERROR_INCORRECT_STATE);
 
@@ -614,7 +664,7 @@ CHIP_ERROR P256Keypair::ECDH_derive_secret(const P256PublicKey & remote_public_k
     VerifyOrExit(result == 0, error = CHIP_ERROR_INVALID_ARGUMENT);
 
     IFX_DBG("IFX_>mbedtls_ecdh_compute_shared() call...\n");
-    result = mbedtls_ecdh_compute_shared(&ecp_grp, &mpi_secret, &ecp_pubkey,  &keypair->d, CryptoRNG, NULL);
+    result = mbedtls_ecdh_compute_shared(&ecp_grp, &mpi_secret, &ecp_pubkey, &keypair->d, CryptoRNG, nullptr);
     IFX_DBG("IFX_>mbedtls_ecdh_compute_shared() returned=>%0x ...\n", result);
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
@@ -674,7 +724,7 @@ CHIP_ERROR P256Keypair::Serialize(P256SerializedKeypair & output)
 {
     const mbedtls_ecp_keypair * keypair = to_const_keypair(&mKeypair);
     size_t len                          = output.Length() == 0 ? output.Capacity() : output.Length();
-    BufBound bbuf(output, len);
+    Encoding::BufferWriter bbuf(output, len);
     uint8_t privkey[kP256_PrivateKey_Length];
     CHIP_ERROR error = CHIP_NO_ERROR;
     int result       = 0;
@@ -682,15 +732,15 @@ CHIP_ERROR P256Keypair::Serialize(P256SerializedKeypair & output)
     bbuf.Put(mPublicKey, mPublicKey.Length());
 
     VerifyOrExit(bbuf.Available() == sizeof(privkey), error = CHIP_ERROR_INTERNAL);
-    VerifyOrExit(mbedtls_mpi_size(&keypair->d) == bbuf.Available(), error = CHIP_ERROR_INTERNAL);
+    VerifyOrExit(mbedtls_mpi_size(&keypair->d) <= bbuf.Available(), error = CHIP_ERROR_INTERNAL);
 
     result = mbedtls_mpi_write_binary(&keypair->d, Uint8::to_uchar(privkey), sizeof(privkey));
     VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
 
     bbuf.Put(privkey, sizeof(privkey));
-    VerifyOrExit(bbuf.Fit(), error = CHIP_ERROR_NO_MEMORY);
+    VerifyOrExit(bbuf.Fit(), error = CHIP_ERROR_BUFFER_TOO_SMALL);
 
-    output.SetLength(bbuf.Written());
+    output.SetLength(bbuf.Needed());
 
 exit:
     memset(privkey, 0, sizeof(privkey));
@@ -700,7 +750,7 @@ exit:
 
 CHIP_ERROR P256Keypair::Deserialize(P256SerializedKeypair & input)
 {
-    BufBound bbuf(mPublicKey, mPublicKey.Length());
+    Encoding::BufferWriter bbuf(mPublicKey, mPublicKey.Length());
 
     int result       = 0;
     CHIP_ERROR error = CHIP_NO_ERROR;
@@ -768,9 +818,8 @@ CHIP_ERROR P256Keypair::NewCertificateSigningRequest(uint8_t * out_csr, size_t &
     mbedtls_x509write_csr_set_md_alg(&csr, MBEDTLS_MD_SHA256);
 
     result = mbedtls_x509write_csr_pem(&csr, out_csr, length, CryptoRNG, nullptr);
-    VerifyOrExit(result >= 0, error = CHIP_ERROR_INTERNAL);
-    csr_length = static_cast<unsigned int>(result);
-    result     = 0;
+    VerifyOrExit(result == 0, error = CHIP_ERROR_INTERNAL);
+    csr_length = strlen(Uint8::to_const_char(out_csr));
 
 exit:
     keypair = nullptr;
@@ -801,8 +850,7 @@ typedef struct Spake2p_Context
 
 static inline Spake2p_Context * to_inner_spake2p_context(Spake2pOpaqueContext * context)
 {
-    nlSTATIC_ASSERT_PRINT(sizeof(context->mOpaque) >= sizeof(Spake2p_Context), "Need more memory for Spake2p Context");
-    return reinterpret_cast<Spake2p_Context *>(context->mOpaque);
+    return SafePointerCast<Spake2p_Context *>(context);
 }
 
 CHIP_ERROR Spake2p_P256_SHA256_HKDF_HMAC::InitInternal(void)
