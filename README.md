@@ -150,7 +150,7 @@ ubuntu@ubuntu:~$~/connectedhomeip$ sudo out/pi/tests/CHIPCryptoPALTest
 
 Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedtls.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output. A sample output is provided in *HWTestPassOutput.txt*
 
-##12 - Run TE1 Tests
+## 12 - Run TE1 Tests
 Build the lighting app and start it
 ```console
 ubuntu@ubuntu:~$~/connectedhomeip$ cd examples/lighting-app/linux/
@@ -162,7 +162,7 @@ Build and run the controller as per the chip instructions. For example to run th
 ```console
 ubuntu@ubuntu:~/connectedhomeip$ sudo btmgmt -i hci0 power off;sudo btmgmt -i hci0 bredr off;sudo btmgmt -i hci0 power on
 ubuntu@ubuntu:~/connectedhomeip$ chip-tool pairing ble TESTSSID TESTPASSWD 12345678 3840
-'''
+```
 
 Note that after each test it is best to reset the BT adapter on both the controller and lighting app
 ```console
