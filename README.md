@@ -23,14 +23,14 @@ Then, to build the CHIP code (Based on instructions at https://github.com/projec
 
 ## 1 - Clone the CHIP repo
 
-Use commit bd7042eb5ab2a071dcbc726edc896a788269eeea , Wed Oct 28 15:37:51 2020 -0400
+Use TE1 release of CHIP repo - branch test_event_1
 
 ```console 
 ubuntu@ubuntu:~$ cd ~
 ubuntu@ubuntu:~$ git clone https://github.com/project-chip/connectedhomeip
 ubuntu@ubuntu:~$ cd connectedhomeip
 ubuntu@ubuntu:~$ git submodule update --init
-ubuntu@ubuntu:~$ git checkout bd7042eb5ab2a071dcbc726edc896a788269eeea
+ubuntu@ubuntu:~$ git checkout test_event_1
 ```
 
 ## 2 - Install missing packages
@@ -72,7 +72,7 @@ ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/mbedtls/
 
 gn file to build OPTIGA M SW
 ```console
-ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/mbedtls/BUILD.gn $HOME/connectedhomeip/third_party/mbedtls
+ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/mbedtls/mbedtls.gni $HOME/connectedhomeip/third_party/mbedtls
 ```
 
 init function declarations
@@ -89,10 +89,6 @@ OPTIGA M crypto driver
 ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/CHIPCryptoPALmbedTLS.cpp $HOME/connectedhomeip/src/crypto
 ```
 
-gn  file to build crypto driver tests
-```console
-ubuntu@ubuntu:~$~/connectedhomeip$ cp $HOME/connected-home-optiga-trust/src/crypto/tests/BUILD.gn $HOME/connectedhomeip/src/crypto/tests
-```
 
 OPTIGA M crypto driver tests
 ```console
@@ -153,6 +149,26 @@ ubuntu@ubuntu:~$~/connectedhomeip$ sudo out/pi/tests/CHIPCryptoPALTest
 ```
 
 Note: For instrumenting the code there are several printfs in CHIPCryptoPALmbedtls.cpp & ChipCryptoPALTest.cpp. They all start with printf("IFX_> , so you can use an editor to automatically comment or delete these as needed. The output appears in the crypto test output. A sample output is provided in *HWTestPassOutput.txt*
+
+##12 - Run TE1 Tests
+Build the lighting app and start it
+```console
+ubuntu@ubuntu:~$~/connectedhomeip$ cd examples/lighting-app/linux/
+ubuntu@ubuntu:~$~/connectedhomeip$ gn gen out/optiga --args='chip_crypto="mbedtls" chip_enable_python_modules=false treat_warnings_as_errors = false'
+ubuntu@ubuntu:~$~/connectedhomeip$ sudo ./out/optiga/chip-lighting-app
+```
+
+Build and run the controller as per the chip instructions. For example to run the BLE pairing test, run
+```console
+ubuntu@ubuntu:~/connectedhomeip$ sudo btmgmt -i hci0 power off;sudo btmgmt -i hci0 bredr off;sudo btmgmt -i hci0 power on
+ubuntu@ubuntu:~/connectedhomeip$ chip-tool pairing ble TESTSSID TESTPASSWD 12345678 3840
+'''
+
+Note that after each test it is best to reset the BT adapter on both the controller and lighting app
+```console
+ubuntu@ubuntu:~/connectedhomeip$ sudo hciconfig hci0 reset;sudo invoke-rc.d bluetooth restart;
+```
+
 
 IMPLEMENTATION DETAILS
 
