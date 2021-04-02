@@ -37,7 +37,7 @@
 
 
 
-
+static int optigaInitDone = 0xff;
 static optiga_util_t * me_util;
 static volatile optiga_lib_status_t optiga_lib_status;
 static optiga_lib_status_t return_status; 
@@ -125,8 +125,23 @@ optiga_crypt_t * get_optiga_crypt(void) {
 
 
 //MbedTLS Platform Init Functions
-int mbedtls_platform_setup(mbedtls_platform_context* ctx	) {
-  return trustm_init();
+int mbedtls_platform_setup(mbedtls_platform_context* ctx) {
+  if(optigaInitDone != 0){			// Do the init if required
+	if(trustm_init() == 0) {
+		printf("Optiga Trust M Init OK\n");
+		optigaInitDone = 0;	
+		return(0);
+	}		
+    else {
+		printf("Optiga Trust M Init FAIL\n");
+		return(-1);	           // Failed (try again)
+	}
+  }
+
+  return(0);
+  
+ 
+ 
 }
 
 void mbedtls_platform_teardown(mbedtls_platform_context* ctx) {
